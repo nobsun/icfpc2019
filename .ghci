@@ -1,0 +1,4 @@
+-- :set -pgmL markdown-unlit
+:set prompt ">>> "
+:set -interactive-print=Text.Show.Unicode.uprint
+:set +t
