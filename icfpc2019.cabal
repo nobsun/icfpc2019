@@ -1,0 +1,102 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: c65c0aede0ca7d4747323ca1f61742fc45fa63407ce6541cf925db6f367d16f4
+
+name:           icfpc2019
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/nobsun/icfpc2019#readme>
+homepage:       https://github.com/nobsun/icfpc2019#readme
+bug-reports:    https://github.com/nobsun/icfpc2019/issues
+author:         Nobuo Yamashita
+maintainer:     nobsun@gmail.com
+copyright:      Copyright: (c) 2019 Nobuo Yamashita
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/nobsun/icfpc2019
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_icfpc2019
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , doctest
+    , hspec
+    , main-tester
+    , markdown-unlit
+    , unicode-show
+    , utf8-string
+  default-language: Haskell2010
+
+executable icfpc2019-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_icfpc2019
+  hs-source-dirs:
+      app
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , doctest
+    , hspec
+    , icfpc2019
+    , main-tester
+    , markdown-unlit
+    , unicode-show
+    , utf8-string
+  default-language: Haskell2010
+
+test-suite icfpc2019-doctest
+  type: exitcode-stdio-1.0
+  main-is: doctests.hs
+  other-modules:
+      LibSpec
+      Paths_icfpc2019
+  hs-source-dirs:
+      test
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , doctest
+    , hspec
+    , icfpc2019
+    , main-tester
+    , markdown-unlit
+    , unicode-show
+    , utf8-string
+  default-language: Haskell2010
+
+test-suite icfpc2019-test
+  type: exitcode-stdio-1.0
+  main-is: spec.hs
+  other-modules:
+      LibSpec
+      Paths_icfpc2019
+  hs-source-dirs:
+      test
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , doctest
+    , hspec
+    , icfpc2019
+    , main-tester
+    , markdown-unlit
+    , unicode-show
+    , utf8-string
+  default-language: Haskell2010
