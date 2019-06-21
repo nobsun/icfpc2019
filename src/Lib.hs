@@ -7,4 +7,4 @@ module Lib
 -- なんか関数
 
 someFunc :: IO ()
-someFunc = putStrLn "なんか函数"
+someFunc = putStrLn "なんか関数" --- "なんか函数"
