@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       Lib
+      Region
       Task
   other-modules:
       Paths_icfpc2019
