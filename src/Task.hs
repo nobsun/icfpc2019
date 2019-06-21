@@ -3,6 +3,9 @@ module Task
 --    )
 where
 
+import Control.Monad.Trans.Writer (Writer, execWriter, tell)
+import Data.DList (DList)
+import qualified Data.DList as DList
 import Data.Attoparsec.ByteString.Char8
 import qualified Data.ByteString.Char8 as BS
 
@@ -12,6 +15,12 @@ import qualified Data.ByteString.Char8 as BS
 
 -----------------------------------------------------
 -- 3.2 Encoding solutions
+
+type PrintM = Writer (DList Char)
+type Printer a = a -> PrintM ()
+
+runPrinter :: Printer a -> a -> String
+runPrinter p = DList.toList . execWriter . p
 
 data Action
   = ActionW
@@ -38,6 +47,14 @@ instance Show Action where
   show ActionF = "F"
   show ActionL = "L"
 
+printAction :: Printer Action
+printAction a = tell . DList.fromList $ show a
+
+printActions :: Printer [Action]
+printActions = mapM_ printAction
+
+printActionDList :: Printer (DList Action)
+printActionDList = mapM_ printAction . DList.toList
 
 -----------------------------------------------------
 -- 3.1 Task descriptions
