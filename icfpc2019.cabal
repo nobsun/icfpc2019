@@ -40,7 +40,7 @@ library
     , main-tester
     , markdown-unlit
     , unicode-show
-    , utf8-string
+    , text
   default-language: Haskell2010
 
 executable icfpc2019-exe
@@ -58,7 +58,7 @@ executable icfpc2019-exe
     , main-tester
     , markdown-unlit
     , unicode-show
-    , utf8-string
+    , text
   default-language: Haskell2010
 
 test-suite icfpc2019-doctest
@@ -78,7 +78,7 @@ test-suite icfpc2019-doctest
     , main-tester
     , markdown-unlit
     , unicode-show
-    , utf8-string
+    , text
   default-language: Haskell2010
 
 test-suite icfpc2019-test
@@ -98,5 +98,5 @@ test-suite icfpc2019-test
     , main-tester
     , markdown-unlit
     , unicode-show
-    , utf8-string
+    , text
   default-language: Haskell2010

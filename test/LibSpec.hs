@@ -4,7 +4,8 @@ module LibSpec
   ) where
 
 import Data.String
-import qualified Codec.Binary.UTF8.String as U
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
 import qualified Data.ByteString as B
 import Test.Main
 import Test.Hspec
@@ -14,11 +15,11 @@ import Lib
 newtype UString a = UString a deriving Eq
 
 ustring :: B.ByteString -> UString String
-ustring = UString . U.decode . B.unpack
+ustring = UString . T.unpack . T.decodeUtf8
 
 instance IsString a => IsString (UString a) where
   fromString = UString . fromString
-  
+
 instance Show a => Show (UString a) where
   show (UString s) = ushow s
 
