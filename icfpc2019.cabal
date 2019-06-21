@@ -28,12 +28,14 @@ source-repository head
 library
   exposed-modules:
       Lib
+      Task
   other-modules:
       Paths_icfpc2019
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      attoparsec
+    , base >=4.7 && <5
     , bytestring
     , doctest
     , hspec
