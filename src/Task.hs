@@ -1,5 +1,5 @@
 module Task
---    ( 
+--    (
 --    )
 where
 
@@ -76,25 +76,16 @@ parseTask s = do
 
 
 taskP :: Parser Task
-taskP = do
-  m <- taskMapP
-  _ <- char '#'
-  p <- pointP
-  _ <- char '#'
-  o <- obstaclesP
-  _ <- char '#'
-  b <- boostersP
-  return (Task m p o b)
+taskP =
+  Task
+  <$> taskMapP    <* char '#'
+  <*> pointP      <* char '#'
+  <*> obstaclesP  <* char '#'
+  <*> boostersP
 
 
 pointP :: Parser Point
-pointP = do
-  _ <- char '('
-  x <- decimal
-  _ <- char ','
-  y <- decimal
-  _ <- char ')'
-  return (x,y)
+pointP = (,) <$> (char '(' *> decimal) <* char ',' <*> decimal <* char ')'
 
 
 taskMapP :: Parser TaskMap
@@ -113,11 +104,8 @@ boostersP = do
 
 
 boosterLocationP :: Parser (BoosterCode, Point)
-boosterLocationP = do
-  c <- boosterCodeP
-  p <- pointP
-  return (c, p)
-
+boosterLocationP =
+  (,) <$> boosterCodeP <*> pointP
 
 
 -- | Parsing BoosterCode.
