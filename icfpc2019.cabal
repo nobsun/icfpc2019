@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9741788bc73b3a6aa01a29511238f8db6eecbb351aadabfd8425b33a41c24e65
+-- hash: 86945df35f7b8602211ef21a8d21fbfb3625051cdc4337a967ea0be7744d2424
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
   exposed-modules:
       Bitmap
       Lib
+      Problems
       Region
       SubmitQueue
       Task
