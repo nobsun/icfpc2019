@@ -25,16 +25,18 @@ data WorkerWrapper = WW
 
 initWW :: Task -> WorkerWrapper
 initWW t@(Task m p o b) =
-  WW { taskMap = fs'
+  WW { taskMap = fs
      , taskPoint = p
-     , taskObstacles = os'
+     , taskObstacles = os
      , taskBoosters = b
      , wwPosition = (0, 0)
      , wwArms = fromList [(0,0),(1,0),(1,1),(1,-1)]
      , wwBoosters = []
-     , wwFrontier = fs'
+     , wwFrontier = fs
      , wwSpeed = 1
      }
   where
-    (fs, os) = partition snd $ fromList $ uncurry zip $ (UA.indices &&& UA.elems) $ buildBitmap t
-    (fs', os') = (Set.map fst fs, Set.map fst os)
+    pair (f, g) x = (f x, g x)
+    tupply f (x, y) = (f x, f y)
+    uarrayToSet = fromList . uncurry zip . pair (UA.indices, UA.elems)
+    (fs, os) = (tupply (Set.map fst) . partition snd . uarrayToSet . buildBitmap) t
