@@ -32,6 +32,7 @@ library
       Region
       Task
       WorkerWrapper
+      SubmitQueue
   other-modules:
       Paths_icfpc2019
   hs-source-dirs:
@@ -43,8 +44,13 @@ library
     , bytestring
     , containers
     , transformers
-    , dlist
+    , filepath
+    , directory
+    , process
     , text
+    , time
+    , time-locale-compat
+    , dlist
     , unicode-show
     -- , doctest
     -- , hspec
@@ -69,6 +75,16 @@ executable icfpc2019-exe
     -- , hspec
     -- , main-tester
     -- , markdown-unlit
+  default-language: Haskell2010
+  ghc-options:      -Wall
+
+executable submit-gateway
+  main-is: gateway.hs
+  hs-source-dirs:
+      app
+  build-depends:
+      base >=4.7 && <5
+    , icfpc2019
   default-language: Haskell2010
   ghc-options:      -Wall
 
