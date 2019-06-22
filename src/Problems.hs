@@ -18,9 +18,9 @@ probClonesDir = "/home/icfpc2019/problems/part-3-clones"
 
 -----
 
-readTask :: (Show a, Integral a)
-         => a -> IO Task
-readTask n = do
+readTaskFile :: (Show a, Integral a)
+             => a -> IO Task
+readTaskFile n = do
   path <- maybe (fail $ "unknown problem number: " ++ show n) return $ problemPath n
   cont <- LB.readFile path
   either (fail . ("parse error in " <> path <> ": " ++)) return $ parseTask cont
