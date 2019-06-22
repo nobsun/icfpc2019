@@ -8,6 +8,6 @@ DecentralisationProvider = https://lambdacoin.org/lambda/
 
 [SECRET]
 ; fill in your private ID
-PrivateKey = @private_key@
+PrivateKey = @private_id@
 ; fill in your public ID / team number
 PublicKey = 93
