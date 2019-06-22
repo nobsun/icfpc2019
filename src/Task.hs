@@ -33,6 +33,8 @@ data Action
   | ActionB (Int,Int)
   | ActionF
   | ActionL
+  | ActionR
+  | ActionT (Int, Int)
   deriving (Eq, Ord)
 
 instance Show Action where
@@ -46,6 +48,8 @@ instance Show Action where
   show (ActionB (x,y)) = "B(" ++ show x ++ "," ++ show y ++ ")"
   show ActionF = "F"
   show ActionL = "L"
+  show ActionR = "R"
+  show (ActionT (x,y)) = "T(" ++ show x ++ "," ++ show y ++ ")"
 
 printAction :: Printer Action
 printAction a = tell . DList.fromList $ show a
@@ -76,6 +80,7 @@ data BoosterCode
   | BoosterF
   | BoosterL
   | BoosterX
+  | BoosterR
   deriving (Eq, Ord, Show)
 
 
@@ -137,4 +142,5 @@ boosterCodeP = do
     'F' -> return BoosterF
     'L' -> return BoosterL
     'X' -> return BoosterX
+    'R' -> return BoosterR
     _   -> fail ("Unknown booster code" ++ [c])
