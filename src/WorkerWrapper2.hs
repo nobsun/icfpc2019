@@ -110,7 +110,8 @@ move i d s
 -- という動きのような気がするが、そうすると高速移動中はアイテムを回収できないことになるのではないか?
 move' :: Int -> Point -> State -> State
 move' i (dx,dy) s
-  | not (stMap s ! (x1,y1)) && wsDrillRemainingTime w0 == 0 = error "cannot move"
+  | not (inRange (bounds (stMap s)) (x1,y1)) = s
+  | not (stMap s ! (x1,y1)) && wsDrillRemainingTime w0 <= 0 = s
   | otherwise =
     s
     { stMap = map1
