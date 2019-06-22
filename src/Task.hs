@@ -8,6 +8,7 @@ import Control.Monad
 import Control.Monad.Trans.Writer (Writer, execWriter, tell)
 import Data.DList (DList)
 import qualified Data.DList as DList
+import Data.List
 import Data.Attoparsec.ByteString.Char8
 import qualified Data.ByteString.Char8 as BS
 
@@ -37,6 +38,7 @@ data Action
   | ActionL
   | ActionR
   | ActionT (Int, Int)
+  | ActionC
   deriving (Eq, Ord)
 
 instance Show Action where
@@ -52,20 +54,23 @@ instance Show Action where
   show ActionL = "L"
   show ActionR = "R"
   show (ActionT (x,y)) = "T(" ++ show x ++ "," ++ show y ++ ")"
+  show ActionC = "C"
 
 printAction :: Printer Action
 printAction a = tell . DList.fromList $ show a
 
-printActions :: Printer [Action]
+type Actions = [Action]
+
+printActions :: Printer Actions
 printActions = mapM_ printAction
 
 printActionDList :: Printer (DList Action)
 printActionDList = mapM_ printAction . DList.toList
 
-parseActions :: BS.ByteString -> Either String [Action]
+parseActions :: BS.ByteString -> Either String Actions
 parseActions = parseOnly actionsP
 
-actionsP :: Parser [Action]
+actionsP :: Parser Actions
 actionsP = many actionP
 
 actionP :: Parser Action
@@ -82,7 +87,19 @@ actionP = msum
   , char 'L' *> pure ActionL
   , char 'R' *> pure ActionR
   , ActionT <$> (char 'T' *> pointP)
+  , char 'C' *> pure ActionC
   ]
+
+type Solution = [Actions]
+
+printSolution :: Printer Solution
+printSolution = sequence_ . intersperse (tell (DList.singleton '#')) . map printActions
+
+parseSolution :: BS.ByteString -> Either String Solution
+parseSolution = parseOnly solutionP
+
+solutionP :: Parser Solution
+solutionP = sepBy actionsP (char '#')
 
 -----------------------------------------------------
 -- 3.1 Task descriptions
@@ -105,6 +122,7 @@ data BoosterCode
   | BoosterL
   | BoosterX
   | BoosterR
+  | BoosterC
   deriving (Eq, Ord, Show)
 
 
@@ -167,4 +185,5 @@ boosterCodeP = do
     'L' -> return BoosterL
     'X' -> return BoosterX
     'R' -> return BoosterR
+    'C' -> return BoosterC
     _   -> fail ("Unknown booster code" ++ [c])
