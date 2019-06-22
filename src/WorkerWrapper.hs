@@ -1,67 +1,58 @@
 module WorkerWrapper where
 
 import Control.Monad (forM_)
-import Data.Set as Set
-import qualified Data.Array.Unboxed as UA
+import Data.Array.Unboxed
 
 import Task hiding (TaskMap, taskMap, taskPoint, taskObstacles, taskBoosters)
 import Bitmap (buildBitmap)
 
 type Velocity = Int
-type TaskMap = Set Point
+
+type Cell = Char
 
 data WorkerWrapper = WW
-  { taskMap       :: TaskMap
+  { taskMap       :: UArray Point Bool
   , taskPoint     :: Point
-  , taskObstacles :: TaskMap
   , taskBoosters  :: [(BoosterCode, Point)]
 
   , wwPosition    :: Point
-  , wwArms        :: TaskMap
+  , wwArms        :: [Point]
   , wwBoosters    :: [(BoosterCode, Int)]
-  , wwFrontier    :: TaskMap
+  , wwFrontier    :: UArray Point Bool
   , wwSpeed       :: Velocity
   } deriving (Show, Eq, Ord)
 
 initWW :: Task -> WorkerWrapper
 initWW t@(Task m p o b) =
-  WW { taskMap = fs
+  WW { taskMap = bm
      , taskPoint = p
-     , taskObstacles = os
      , taskBoosters = b
-     
-     , wwArms = fromList [(0,0),(1,0),(1,1),(1,-1)]
+
+     , wwPosition = p
+     , wwArms = [(0,0),(1,0),(1,1),(1,-1)]
      , wwBoosters = []
-     , wwFrontier = fs
+     , wwFrontier = bm
      , wwSpeed = 1
      }
   where
-    pair (f, g) x = (f x, g x)
-    tupply f (x, y) = (f x, f y)
-    uarrayToSet = fromList . uncurry zip . pair (UA.indices, UA.elems)
-    (fs, os) = (tupply (Set.map fst) . partition snd . uarrayToSet . buildBitmap) t
+    bm = buildBitmap t
 
 drawMap prob = do
-  putChar '+' >> putStr (Prelude.take (w+1) $ repeat '-') >> putStrLn "+"
-
   forM_ [h,h-1..0] $ \y -> do
-    putChar '|'
     forM_ [0..w] $ \x -> do
       putChar $ drawCell ww (x, y)
-    putStrLn "|"
-    
-  putChar '+' >> putStr (Prelude.take (w+1) $ repeat '-') >> putStrLn "+"
+    putChar '\n'
   where
     Right t = parseTask prob
     ww = initWW t
-    (w, h) = maximum $ toList $ taskMap ww
+    (_, (w, h)) = bounds $ taskMap ww
 
-drawCell ww pos =
-  if taskPoint ww == pos then '@'
-  else if member pos fs then ' '
-  else if member pos os then '#'
-  else '.'
-  where
-    me = ww
-    fs = wwFrontier ww
-    os = taskObstacles ww
+drawCell :: WorkerWrapper -> Point -> Char
+drawCell ww pos@(x, y) =
+  if wwPosition ww == pos
+  then '@'
+  else if wwFrontier ww ! pos
+  then '.'
+  else if taskMap ww ! pos
+  then '='
+  else '#'
