@@ -3,6 +3,8 @@ module Task
 --    )
 where
 
+import Control.Applicative
+import Control.Monad
 import Control.Monad.Trans.Writer (Writer, execWriter, tell)
 import Data.DList (DList)
 import qualified Data.DList as DList
@@ -33,6 +35,8 @@ data Action
   | ActionB (Int,Int)
   | ActionF
   | ActionL
+  | ActionR
+  | ActionT (Int, Int)
   deriving (Eq, Ord)
 
 instance Show Action where
@@ -46,6 +50,8 @@ instance Show Action where
   show (ActionB (x,y)) = "B(" ++ show x ++ "," ++ show y ++ ")"
   show ActionF = "F"
   show ActionL = "L"
+  show ActionR = "R"
+  show (ActionT (x,y)) = "T(" ++ show x ++ "," ++ show y ++ ")"
 
 printAction :: Printer Action
 printAction a = tell . DList.fromList $ show a
@@ -55,6 +61,28 @@ printActions = mapM_ printAction
 
 printActionDList :: Printer (DList Action)
 printActionDList = mapM_ printAction . DList.toList
+
+parseActions :: BS.ByteString -> Either String [Action]
+parseActions = parseOnly actionsP
+
+actionsP :: Parser [Action]
+actionsP = many actionP
+
+actionP :: Parser Action
+actionP = msum
+  [ char 'W' *> pure ActionW
+  , char 'S' *> pure ActionS
+  , char 'A' *> pure ActionA
+  , char 'D' *> pure ActionD
+  , char 'Z' *> pure ActionZ
+  , char 'E' *> pure ActionE
+  , char 'Q' *> pure ActionQ
+  , ActionB <$> (char 'B' *> pointP)
+  , char 'F' *> pure ActionF
+  , char 'L' *> pure ActionL
+  , char 'R' *> pure ActionR
+  , ActionT <$> (char 'T' *> pointP)
+  ]
 
 -----------------------------------------------------
 -- 3.1 Task descriptions
@@ -76,6 +104,7 @@ data BoosterCode
   | BoosterF
   | BoosterL
   | BoosterX
+  | BoosterR
   deriving (Eq, Ord, Show)
 
 
@@ -137,4 +166,5 @@ boosterCodeP = do
     'F' -> return BoosterF
     'L' -> return BoosterL
     'X' -> return BoosterX
+    'R' -> return BoosterR
     _   -> fail ("Unknown booster code" ++ [c])
