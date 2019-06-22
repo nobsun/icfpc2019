@@ -1,7 +1,7 @@
 module WorkerWrapper where
 
 import Control.Arrow ((&&&))
-import Data.Set
+import Data.Set as Set
 import qualified Data.Array.Unboxed as UA
 
 import Task hiding (TaskMap, taskMap, taskPoint, taskObstacles, taskBoosters)
@@ -25,16 +25,16 @@ data WorkerWrapper = WW
 
 initWW :: Task -> WorkerWrapper
 initWW t@(Task m p o b) =
-  WW { taskMap = convPoints t
+  WW { taskMap = fs'
      , taskPoint = p
-     , taskObstacles = undefined -- TODO
+     , taskObstacles = os'
      , taskBoosters = b
      , wwPosition = (0, 0)
      , wwArms = fromList [(0,0),(1,0),(1,1),(1,-1)]
      , wwBoosters = []
-     , wwFrontier = undefined -- TODO
+     , wwFrontier = fs'
      , wwSpeed = 1
      }
-
-convPoints :: Task -> Set Point
-convPoints t = fromList $ Prelude.map fst $ Prelude.filter snd $ uncurry zip $ (UA.indices &&& UA.elems) (buildBitmap t)
+  where
+    (fs, os) = partition snd $ fromList $ uncurry zip $ (UA.indices &&& UA.elems) $ buildBitmap t
+    (fs', os') = (Set.map fst fs, Set.map fst os)
