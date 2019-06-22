@@ -21,15 +21,26 @@ description:         Please see the README on GitHub at <https://github.com/nobs
 
 dependencies:
 - base >= 4.7 && < 5
-- unicode-show
-- markdown-unlit
-- doctest
-- bytestring
-- utf8-string
-- hspec
-- main-tester
+
+ghc-options:
+- -Wall
 
 library:
+  dependencies:
+  - array
+  - bytestring
+  - containers
+  - transformers
+  - filepath
+  - directory
+  - process
+  - text
+  - time
+  - time-locale-compat
+  - attoparsec
+  - dlist
+  - unicode-show
+
   source-dirs: src
 
 executables:
@@ -53,6 +64,13 @@ tests:
     # - -with-rtsopts=-N
     dependencies:
     - icfpc2019
+    - bytestring
+    - text
+    - unicode-show
+    - doctest
+    - hspec
+    - main-tester
+    - markdown-unlit
 
   icfpc2019-doctest:
     main:                doctests.hs
@@ -63,3 +81,10 @@ tests:
     # - -with-rtsopts=-N
     dependencies:
     - icfpc2019
+    - bytestring
+    - text
+    - unicode-show
+    - doctest
+    - hspec
+    - main-tester
+    - markdown-unlit
