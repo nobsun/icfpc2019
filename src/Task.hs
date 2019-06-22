@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Task
 --    (
 --    )
@@ -22,11 +24,11 @@ import qualified Data.ByteString.Lazy.Char8 as L8
 -----------------------------------------------------
 -- 3.2 Encoding solutions
 
-type PrintM = Writer (DList Char)
+type PrintM = Writer (DList LB.ByteString)
 type Printer a = a -> PrintM ()
 
-runPrinter :: Printer a -> a -> String
-runPrinter p = DList.toList . execWriter . p
+runPrinter :: Printer a -> a -> LB.ByteString
+runPrinter p = mconcat . DList.toList . execWriter . p
 
 data Action
   = ActionW
@@ -44,7 +46,7 @@ data Action
   | ActionC
   deriving (Eq, Ord, Show)
 
-encodeAction :: Action -> String
+encodeAction :: Action -> LB.ByteString
 encodeAction = enc
   where
     enc ActionW = "W"
@@ -54,15 +56,15 @@ encodeAction = enc
     enc ActionZ = "Z"
     enc ActionE = "E"
     enc ActionQ = "Q"
-    enc (ActionB (x,y)) = "B(" ++ show x ++ "," ++ show y ++ ")"
+    enc (ActionB (x,y)) = "B(" <> L8.pack (show x) <> "," <> L8.pack (show y) <> ")"
     enc ActionF = "F"
     enc ActionL = "L"
     enc ActionR = "R"
-    enc (ActionT (x,y)) = "T(" ++ show x ++ "," ++ show y ++ ")"
+    enc (ActionT (x,y)) = "T(" <> L8.pack (show x) <> "," <> L8.pack (show y) <> ")"
     enc ActionC = "C"
 
 printAction :: Printer Action
-printAction a = tell . DList.fromList $ encodeAction a
+printAction a = tell . pure $ encodeAction a
 
 type Actions = [Action]
 
@@ -97,7 +99,7 @@ actionP = msum
 type Solution = [Actions]
 
 printSolution :: Printer Solution
-printSolution = sequence_ . intersperse (tell (DList.singleton '#')) . map printActions
+printSolution = sequence_ . intersperse (tell (pure "#")) . map printActions
 
 parseSolution :: LB.ByteString -> Either String Solution
 parseSolution = runParser (solutionP <* endOfInput)
