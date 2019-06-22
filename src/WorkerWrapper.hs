@@ -1,6 +1,6 @@
 module WorkerWrapper where
 
-import Control.Arrow ((&&&))
+import Control.Monad (forM_)
 import Data.Set as Set
 import qualified Data.Array.Unboxed as UA
 
@@ -29,7 +29,7 @@ initWW t@(Task m p o b) =
      , taskPoint = p
      , taskObstacles = os
      , taskBoosters = b
-     , wwPosition = (0, 0)
+     
      , wwArms = fromList [(0,0),(1,0),(1,1),(1,-1)]
      , wwBoosters = []
      , wwFrontier = fs
@@ -40,3 +40,28 @@ initWW t@(Task m p o b) =
     tupply f (x, y) = (f x, f y)
     uarrayToSet = fromList . uncurry zip . pair (UA.indices, UA.elems)
     (fs, os) = (tupply (Set.map fst) . partition snd . uarrayToSet . buildBitmap) t
+
+drawMap prob = do
+  putChar '+' >> putStr (Prelude.take (w+1) $ repeat '-') >> putStrLn "+"
+
+  forM_ [h,h-1..0] $ \y -> do
+    putChar '|'
+    forM_ [0..w] $ \x -> do
+      putChar $ drawCell ww (x, y)
+    putStrLn "|"
+    
+  putChar '+' >> putStr (Prelude.take (w+1) $ repeat '-') >> putStrLn "+"
+  where
+    Right t = parseTask prob
+    ww = initWW t
+    (w, h) = maximum $ toList $ taskMap ww
+
+drawCell ww pos =
+  if taskPoint ww == pos then '@'
+  else if member pos fs then ' '
+  else if member pos os then '#'
+  else '.'
+  where
+    me = ww
+    fs = wwFrontier ww
+    os = taskObstacles ww
