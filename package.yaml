@@ -40,6 +40,7 @@ library:
   - attoparsec
   - dlist
   - unicode-show
+  - vector
 
   source-dirs: src
 

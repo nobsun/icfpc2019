@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a3be68e0f539268461c067b86553d1a0526a5f61788f87d61161426c8b697529
+-- hash: 1e8d63a55e350d32d24eb6f0966d2626ae946c82ab923e98e99dd0f85b26b7f8
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -34,6 +34,7 @@ library
       SubmitQueue
       Task
       WorkerWrapper
+      WorkerWrapper2
   other-modules:
       Paths_icfpc2019
   hs-source-dirs:
@@ -53,6 +54,7 @@ library
     , time-locale-compat
     , transformers
     , unicode-show
+    , vector
   default-language: Haskell2010
   ghc-options: -Wall
 
