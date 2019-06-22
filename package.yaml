@@ -40,6 +40,7 @@ library:
   - attoparsec
   - dlist
   - unicode-show
+  - vector
 
   source-dirs: src
 
@@ -64,6 +65,17 @@ executables:
     dependencies:
     - icfpc2019
 
+  view-map:
+    main:                viewMap.hs
+    source-dirs:         app
+    # ghc-options:
+    # - -threaded
+    # - -rtsopts
+    # - -with-rtsopts=-N
+    dependencies:
+    - icfpc2019
+    - array
+
 tests:
   icfpc2019-test:
     main:                spec.hs
@@ -80,7 +92,6 @@ tests:
     - doctest
     - hspec
     - main-tester
-    - markdown-unlit
 
   icfpc2019-doctest:
     main:                doctests.hs
@@ -97,4 +108,3 @@ tests:
     - doctest
     - hspec
     - main-tester
-    - markdown-unlit

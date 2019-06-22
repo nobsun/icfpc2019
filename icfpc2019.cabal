@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9741788bc73b3a6aa01a29511238f8db6eecbb351aadabfd8425b33a41c24e65
+-- hash: 1e8d63a55e350d32d24eb6f0966d2626ae946c82ab923e98e99dd0f85b26b7f8
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -29,10 +29,12 @@ library
   exposed-modules:
       Bitmap
       Lib
+      Problems
       Region
       SubmitQueue
       Task
       WorkerWrapper
+      WorkerWrapper2
   other-modules:
       Paths_icfpc2019
   hs-source-dirs:
@@ -52,6 +54,7 @@ library
     , time-locale-compat
     , transformers
     , unicode-show
+    , vector
   default-language: Haskell2010
   ghc-options: -Wall
 
@@ -80,6 +83,20 @@ executable submit-gateway
     , icfpc2019
   default-language: Haskell2010
 
+executable view-map
+  main-is: viewMap.hs
+  other-modules:
+      Main
+      Paths_icfpc2019
+  hs-source-dirs:
+      app
+  ghc-options: -Wall
+  build-depends:
+      array
+    , base >=4.7 && <5
+    , icfpc2019
+  default-language: Haskell2010
+
 test-suite icfpc2019-doctest
   type: exitcode-stdio-1.0
   main-is: doctests.hs
@@ -95,7 +112,6 @@ test-suite icfpc2019-doctest
     , hspec
     , icfpc2019
     , main-tester
-    , markdown-unlit
     , text
     , unicode-show
   default-language: Haskell2010
@@ -116,7 +132,6 @@ test-suite icfpc2019-test
     , hspec
     , icfpc2019
     , main-tester
-    , markdown-unlit
     , text
     , unicode-show
   default-language: Haskell2010
