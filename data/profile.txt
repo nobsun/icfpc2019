@@ -1,0 +1,18 @@
+Public ID : 93
+Private ID :
+
+---
+
+Team name : Sampou
+Email : icfpc2019@reasoning.tokyo
+Team members (one per line) :
+  Katsutoshi Ito
+  Kei Hibino
+  Masahiro Sakai
+  Nobuo Yamashita
+  Yasuyuki Ogawa
+  Chikanobu Toyofuku
+Countries (comma-separated three-letter country codes) : JPN
+Programming languages (comma-separated) : Haskell
+Source code ZIP :
+Comments :
