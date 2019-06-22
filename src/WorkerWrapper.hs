@@ -1,7 +1,11 @@
 module WorkerWrapper where
 
-import Task hiding (TaskMap, taskMap, taskPoint, taskObstacles, taskBoosters)
+import Control.Arrow ((&&&))
 import Data.Set
+import qualified Data.Array.Unboxed as UA
+
+import Task hiding (TaskMap, taskMap, taskPoint, taskObstacles, taskBoosters)
+import Bitmap (buildBitmap)
 
 type Velocity = Int
 type TaskMap = Set Point
@@ -20,8 +24,8 @@ data WorkerWrapper = WW
   } deriving (Show, Eq, Ord)
 
 initWW :: Task -> WorkerWrapper
-initWW (Task m p o b) =
-  WW { taskMap = undefined
+initWW t@(Task m p o b) =
+  WW { taskMap = convPoints t
      , taskPoint = p
      , taskObstacles = undefined -- TODO
      , taskBoosters = b
@@ -31,3 +35,6 @@ initWW (Task m p o b) =
      , wwFrontier = undefined -- TODO
      , wwSpeed = 1
      }
+
+convPoints :: Task -> Set Point
+convPoints t = fromList $ Prelude.map fst $ Prelude.filter snd $ uncurry zip $ (UA.indices &&& UA.elems) (buildBitmap t)
