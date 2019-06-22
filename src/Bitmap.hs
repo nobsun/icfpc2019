@@ -21,5 +21,5 @@ bitmapToLines bm = do
   y <- [ymax,ymax-1..ymin]
   return [if bm ! (x,y) then '.' else '#' | x <- [xmin..xmax]]
 
-printBitmap :: UArray (Int,Int) Bool -> IO ()
+printBitmap :: UArray Point Bool -> IO ()
 printBitmap = mapM_ putStrLn . bitmapToLines
