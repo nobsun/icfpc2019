@@ -25,6 +25,7 @@ initWW (Task m p o b) =
      , taskBoosters = b
      , wwPosition = (0, 0)
      , wwArms = [(0,0),(1,0),(1,1),(1,-1)]
+     , wwBoosters = []
      , wwFrontier = []
      , wwSpeed = 1
      }
