@@ -30,6 +30,7 @@ library
       Bitmap
       Lib
       Region
+      ShortestPath
       Task
       WorkerWrapper
   other-modules:
@@ -41,10 +42,16 @@ library
     , attoparsec
     , base >=4.7 && <5
     , bytestring
+    , containers
     , transformers
     , dlist
+    , hashable
+    , hashtables
+    , heaps
+    , mtl
     , text
     , unicode-show
+    , unordered-containers
     -- , doctest
     -- , hspec
     -- , main-tester
