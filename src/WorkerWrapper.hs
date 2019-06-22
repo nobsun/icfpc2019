@@ -1,21 +1,30 @@
 module WorkerWrapper where
 
-import Task
+import Task hiding (taskMap, taskPoint, taskObstacles, taskBoosters)
 
-type Position = (Int, Int)
-data Dir = U | D | L | R deriving (Show, Eq, Ord)
+type Velocity = Int
 
-data WorkerWrapper = WW { -- 現在の位置
-                          pos :: Position
-                          -- 現在の向き
-                        , dir :: Dir
-                          -- 本体から到達可能な相対位置(濃い黄色のエリア)
-                          -- ここから障害物や壁を考慮する
-                        , touchable :: [Position]
-                          -- 保有ブースター
-                        , has :: [(BoosterCode, Int)]
-                          -- 未踏の地
-                        , frontier :: [Position]
-                          -- 速度
-                        , speed :: Int
-                        } deriving (Show, Eq)
+data WorkerWrapper = WW
+  { taskMap       :: TaskMap
+  , taskPoint     :: Point
+  , taskObstacles :: [TaskMap]
+  , taskBoosters  :: [(BoosterCode, Point)]
+
+  , wwPosition    :: Point
+  , wwArms        :: TaskMap
+  , wwBoosters    :: [(BoosterCode, Int)]
+  , wwFrontier    :: TaskMap
+  , wwSpeed       :: Velocity
+  } deriving (Show, Eq, Ord)
+
+initWW :: Task -> WorkerWrapper
+initWW (Task m p o b) =
+  WW { taskMap = m
+     , taskPoint = p
+     , taskObstacles = o
+     , taskBoosters = b
+     , wwPosition = (0, 0)
+     , wwArms = [(0,0),(1,0),(1,1),(1,-1)]
+     , wwFrontier = []
+     , wwSpeed = 1
+     }
