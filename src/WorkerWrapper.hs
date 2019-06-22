@@ -1,13 +1,15 @@
 module WorkerWrapper where
 
-import Task hiding (taskMap, taskPoint, taskObstacles, taskBoosters)
+import Task hiding (TaskMap, taskMap, taskPoint, taskObstacles, taskBoosters)
+import Data.Set
 
 type Velocity = Int
+type TaskMap = Set Point
 
 data WorkerWrapper = WW
   { taskMap       :: TaskMap
   , taskPoint     :: Point
-  , taskObstacles :: [TaskMap]
+  , taskObstacles :: TaskMap
   , taskBoosters  :: [(BoosterCode, Point)]
 
   , wwPosition    :: Point
@@ -19,13 +21,13 @@ data WorkerWrapper = WW
 
 initWW :: Task -> WorkerWrapper
 initWW (Task m p o b) =
-  WW { taskMap = m
+  WW { taskMap = fromList m
      , taskPoint = p
-     , taskObstacles = o
+     , taskObstacles = fromList (concat o)
      , taskBoosters = b
      , wwPosition = (0, 0)
-     , wwArms = [(0,0),(1,0),(1,1),(1,-1)]
+     , wwArms = fromList [(0,0),(1,0),(1,1),(1,-1)]
      , wwBoosters = []
-     , wwFrontier = []
+     , wwFrontier = undefined -- TODO
      , wwSpeed = 1
      }
