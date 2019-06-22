@@ -1,14 +1,14 @@
 module WorkerWrapper where
 
 import Task
-import Region
 
 type Position = (Int, Int)
+data Dir = U | D | L | R deriving (Show, Eq, Ord)
 
 data WorkerWrapper = WW { -- 現在の位置
                           pos :: Position
                           -- 現在の向き
-                        , dir :: Direction
+                        , dir :: Dir
                           -- 本体から到達可能な相対位置(濃い黄色のエリア)
                           -- ここから障害物や壁を考慮する
                         , touchable :: [Position]
