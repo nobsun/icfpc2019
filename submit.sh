@@ -27,10 +27,12 @@ ts=$(date +"%d-%H%M%S-%N")
 
 set -x
 
-rm -f ${cwd}/solutions.zip
+solutions_zip=${cwd}/to-enqueue-solutions.zip
 
-( cd $dir && zip -r ${cwd}/solutions.zip *.sol )
+rm -f ${solutions_zip}
+
+( cd $dir && zip -r ${solutions_zip} *.sol )
 
 # unzip -l ${cwd}/solutions.zip
 
-cp -a ${cwd}/solutions.zip /home/icfpc2019/submit/post/${ts}.zip
+cp -a ${solutions_zip} /home/icfpc2019/submit/post/${ts}.zip
