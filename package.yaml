@@ -80,7 +80,6 @@ tests:
     - doctest
     - hspec
     - main-tester
-    - markdown-unlit
 
   icfpc2019-doctest:
     main:                doctests.hs
@@ -97,4 +96,3 @@ tests:
     - doctest
     - hspec
     - main-tester
-    - markdown-unlit

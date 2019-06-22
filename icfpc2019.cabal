@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 86945df35f7b8602211ef21a8d21fbfb3625051cdc4337a967ea0be7744d2424
+-- hash: c26c6b0f41e68daea067f17b2436d34da4a15af7cf31c5d5279d3fb8f4c220c0
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -96,7 +96,6 @@ test-suite icfpc2019-doctest
     , hspec
     , icfpc2019
     , main-tester
-    , markdown-unlit
     , text
     , unicode-show
   default-language: Haskell2010
@@ -117,7 +116,6 @@ test-suite icfpc2019-test
     , hspec
     , icfpc2019
     , main-tester
-    , markdown-unlit
     , text
     , unicode-show
   default-language: Haskell2010
