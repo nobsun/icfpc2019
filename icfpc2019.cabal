@@ -1,10 +1,11 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5f226d841eb95e74e01b79c310d8e25cd0555b7068ced723fda495526d0b41e0
+-- hash: 9741788bc73b3a6aa01a29511238f8db6eecbb351aadabfd8425b33a41c24e65
 
-cabal-version:  >= 1.10
 name:           icfpc2019
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/nobsun/icfpc2019#readme>
@@ -17,8 +18,8 @@ license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
-    ChangeLog.md
     README.md
+    ChangeLog.md
 
 source-repository head
   type: git
@@ -60,11 +61,24 @@ executable icfpc2019-exe
       Paths_icfpc2019
   hs-source-dirs:
       app
+  ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
     , icfpc2019
   default-language: Haskell2010
+
+executable submit-gateway
+  main-is: gateway.hs
+  other-modules:
+      Main
+      Paths_icfpc2019
+  hs-source-dirs:
+      app
   ghc-options: -Wall
+  build-depends:
+      base >=4.7 && <5
+    , icfpc2019
+  default-language: Haskell2010
 
 test-suite icfpc2019-doctest
   type: exitcode-stdio-1.0
