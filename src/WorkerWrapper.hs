@@ -21,9 +21,9 @@ data WorkerWrapper = WW
 
 initWW :: Task -> WorkerWrapper
 initWW (Task m p o b) =
-  WW { taskMap = fromList m
+  WW { taskMap = undefined
      , taskPoint = p
-     , taskObstacles = fromList (concat o)
+     , taskObstacles = undefined -- TODO
      , taskBoosters = b
      , wwPosition = (0, 0)
      , wwArms = fromList [(0,0),(1,0),(1,1),(1,-1)]
