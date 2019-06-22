@@ -41,12 +41,12 @@ library
     , bytestring
     , transformers
     , dlist
-    , doctest
-    , hspec
-    , main-tester
-    , markdown-unlit
-    , unicode-show
     , text
+    , unicode-show
+    -- , doctest
+    -- , hspec
+    -- , main-tester
+    -- , markdown-unlit
   default-language: Haskell2010
   ghc-options:      -Wall
 
@@ -59,13 +59,13 @@ executable icfpc2019-exe
   build-depends:
       base >=4.7 && <5
     , bytestring
-    , doctest
-    , hspec
-    , icfpc2019
-    , main-tester
-    , markdown-unlit
-    , unicode-show
     , text
+    , unicode-show
+    , icfpc2019
+    -- , doctest
+    -- , hspec
+    -- , main-tester
+    -- , markdown-unlit
   default-language: Haskell2010
   ghc-options:      -Wall
 
@@ -80,13 +80,13 @@ test-suite icfpc2019-doctest
   build-depends:
       base >=4.7 && <5
     , bytestring
+    , text
+    , unicode-show
+    , icfpc2019
     , doctest
     , hspec
-    , icfpc2019
     , main-tester
     , markdown-unlit
-    , unicode-show
-    , text
   default-language: Haskell2010
   ghc-options:      -Wall
 
@@ -101,12 +101,12 @@ test-suite icfpc2019-test
   build-depends:
       base >=4.7 && <5
     , bytestring
+    , text
+    , unicode-show
+    , icfpc2019
     , doctest
     , hspec
-    , icfpc2019
     , main-tester
     , markdown-unlit
-    , unicode-show
-    , text
   default-language: Haskell2010
   ghc-options:      -Wall
