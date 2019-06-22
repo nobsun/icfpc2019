@@ -30,6 +30,7 @@ library
       Lib
       Region
       Task
+      WorkerWrapper
   other-modules:
       Paths_icfpc2019
   hs-source-dirs:
