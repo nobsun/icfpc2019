@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c26c6b0f41e68daea067f17b2436d34da4a15af7cf31c5d5279d3fb8f4c220c0
+-- hash: a3be68e0f539268461c067b86553d1a0526a5f61788f87d61161426c8b697529
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -78,6 +78,20 @@ executable submit-gateway
   ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
+    , icfpc2019
+  default-language: Haskell2010
+
+executable view-map
+  main-is: viewMap.hs
+  other-modules:
+      Main
+      Paths_icfpc2019
+  hs-source-dirs:
+      app
+  ghc-options: -Wall
+  build-depends:
+      array
+    , base >=4.7 && <5
     , icfpc2019
   default-language: Haskell2010
 
