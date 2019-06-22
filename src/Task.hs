@@ -3,6 +3,8 @@ module Task
 --    )
 where
 
+import Control.Applicative
+import Control.Monad
 import Control.Monad.Trans.Writer (Writer, execWriter, tell)
 import Data.DList (DList)
 import qualified Data.DList as DList
@@ -59,6 +61,28 @@ printActions = mapM_ printAction
 
 printActionDList :: Printer (DList Action)
 printActionDList = mapM_ printAction . DList.toList
+
+parseActions :: BS.ByteString -> Either String [Action]
+parseActions = parseOnly actionsP
+
+actionsP :: Parser [Action]
+actionsP = many actionP
+
+actionP :: Parser Action
+actionP = msum
+  [ char 'W' *> pure ActionW
+  , char 'S' *> pure ActionS
+  , char 'A' *> pure ActionA
+  , char 'D' *> pure ActionD
+  , char 'Z' *> pure ActionZ
+  , char 'E' *> pure ActionE
+  , char 'Q' *> pure ActionQ
+  , ActionB <$> (char 'B' *> pointP)
+  , char 'F' *> pure ActionF
+  , char 'L' *> pure ActionL
+  , char 'R' *> pure ActionR
+  , ActionT <$> (char 'T' *> pointP)
+  ]
 
 -----------------------------------------------------
 -- 3.1 Task descriptions
