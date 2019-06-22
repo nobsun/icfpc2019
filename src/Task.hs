@@ -39,25 +39,27 @@ data Action
   | ActionR
   | ActionT (Int, Int)
   | ActionC
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Show)
 
-instance Show Action where
-  show ActionW = "W"
-  show ActionS = "S"
-  show ActionA = "A"
-  show ActionD = "D"
-  show ActionZ = "Z"
-  show ActionE = "E"
-  show ActionQ = "Q"
-  show (ActionB (x,y)) = "B(" ++ show x ++ "," ++ show y ++ ")"
-  show ActionF = "F"
-  show ActionL = "L"
-  show ActionR = "R"
-  show (ActionT (x,y)) = "T(" ++ show x ++ "," ++ show y ++ ")"
-  show ActionC = "C"
+encodeAction :: Action -> String
+encodeAction = enc
+  where
+    enc ActionW = "W"
+    enc ActionS = "S"
+    enc ActionA = "A"
+    enc ActionD = "D"
+    enc ActionZ = "Z"
+    enc ActionE = "E"
+    enc ActionQ = "Q"
+    enc (ActionB (x,y)) = "B(" ++ show x ++ "," ++ show y ++ ")"
+    enc ActionF = "F"
+    enc ActionL = "L"
+    enc ActionR = "R"
+    enc (ActionT (x,y)) = "T(" ++ show x ++ "," ++ show y ++ ")"
+    enc ActionC = "C"
 
 printAction :: Printer Action
-printAction a = tell . DList.fromList $ show a
+printAction a = tell . DList.fromList $ encodeAction a
 
 type Actions = [Action]
 
@@ -66,6 +68,8 @@ printActions = mapM_ printAction
 
 printActionDList :: Printer (DList Action)
 printActionDList = mapM_ printAction . DList.toList
+
+---
 
 parseActions :: BS.ByteString -> Either String Actions
 parseActions = parseOnly actionsP
