@@ -22,5 +22,6 @@ curl \
     https://monadic-lab.org/submit \
     >> $log_path 2>&1
 
+echo '' >> $log_path
+
 cat $log_path
-echo ''
