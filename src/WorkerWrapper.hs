@@ -248,3 +248,9 @@ clone i s
   where
     WrapperState{ wsPosition = p } = stWrappers s V.! i
     w2 = initialWrapperState p
+
+-------------------------------------------------------------------------------------------
+-- high level API
+-------------------------------------------------------------------------------------------
+possibleActions :: State -> [Action]
+possibleActions = undefined
