@@ -30,19 +30,19 @@ runPrinter :: Printer a -> a -> L8.ByteString
 runPrinter p = mconcat . DList.toList . execWriter . p
 
 data Action
-  = ActionW -- move up
-  | ActionS -- move down
-  | ActionA -- move left
-  | ActionD -- move right
-  | ActionZ -- do nothing
-  | ActionE -- turn 90 deg CW
-  | ActionQ -- turn 90 deg CCW
-  | ActionB (Int,Int) -- attach manipulator
-  | ActionF -- attach fast wheel
-  | ActionL -- start using drill
-  | ActionR -- reset beacon
-  | ActionT (Int, Int) -- shift location
-  | ActionC -- clone
+  = ActionW            -- ^ move up
+  | ActionS            -- ^ move down
+  | ActionA            -- ^ move left
+  | ActionD            -- ^ move right
+  | ActionZ            -- ^ do nothing
+  | ActionE            -- ^ turn 90 deg CW
+  | ActionQ            -- ^ turn 90 deg CCW
+  | ActionB (Int,Int)  -- ^ attach manipulator
+  | ActionF            -- ^ attach fast wheel
+  | ActionL            -- ^ start using drill
+  | ActionR            -- ^ reset beacon
+  | ActionT (Int, Int) -- ^ shift location
+  | ActionC            -- ^ clone
   deriving (Eq, Ord, Show)
 
 encodeAction :: Action -> L8.ByteString
@@ -122,12 +122,12 @@ data Task =  Task
 
 
 data BoosterCode
-  = BoosterB
-  | BoosterF
-  | BoosterL
-  | BoosterX
-  | BoosterR
-  | BoosterC
+  = BoosterB -- ^ manipulator
+  | BoosterF -- ^ fast wheel
+  | BoosterL -- ^ drill
+  | BoosterX -- ^ spawn point
+  | BoosterR -- ^ teleports
+  | BoosterC -- ^ clone
   deriving (Eq, Ord, Show)
 
 
