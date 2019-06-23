@@ -18,6 +18,7 @@ data WrapperState
   , wsFastWheelRemainingTime :: !Int
   , wsDrillRemainingTime :: !Int
   , wsManipulators :: Set Point -- 相対座標
+  , wsBoosterBuffer :: Map BoosterCode Int
   }
   deriving (Show)
 
@@ -59,6 +60,7 @@ initialWrapperState pos =
   , wsFastWheelRemainingTime = 0
   , wsDrillRemainingTime = 0
   , wsManipulators = initialManipulators
+  , wsBoosterBuffer = Map.empty
   }
 
 initialManipulators :: Set Point
@@ -94,8 +96,25 @@ wrap bm ws = Set.fromList $ p : [p1 | (xd,yd) <- Set.toList (wsManipulators ws),
   where
     p@(x,y) = wsPosition ws
 
+
 stepWrapper :: Int -> Action -> State -> State
-stepWrapper i a s = stepTime i $
+stepWrapper i a s =
+  stepTime i $ action i a $ collectItem i s
+
+
+collectItem :: Int -> State -> State
+collectItem i s = s
+  { stBoostersCollected =
+      Map.unionWith (+) (stBoostersCollected s) (wsBoosterBuffer w0)
+  , stWrappers = stWrappers s V.// [(i, w1)]
+  }
+  where
+    w0 = stWrappers s V.! i
+    w1 = w0{ wsBoosterBuffer = Map.empty }
+
+
+action :: Int -> Action -> State -> State
+action i a s =
   case a of
     ActionW -> move i (0,1) s
     ActionS -> move i (0,-1) s
@@ -141,9 +160,6 @@ move' i (dx,dy) s
     s
     { stMap = map1
     , stUnwrapped = stUnwrapped s Set.\\ wrap map1 w1
-    , stBoostersCollected =
-        Map.unionWith (+) (stBoostersCollected s) $
-          Map.fromList [(b,1) | b <- Map.findWithDefault [] (x1,y1) (stBoostersOnMap s)]
     , stBoostersOnMap =
         Map.delete (x1,y1) (stBoostersOnMap s)
     , stWrappers =
@@ -158,7 +174,13 @@ move' i (dx,dy) s
         stMap s // [((x1,y1), True)]
       else
         stMap s
-    w1 = w0{ wsPosition = (x1,y1) }
+    w1 =
+      w0
+      { wsPosition = (x1,y1)
+      , wsBoosterBuffer =
+          Map.unionWith (+) (wsBoosterBuffer w0) $
+            Map.fromList [(b,1) | b <- Map.findWithDefault [] (x1,y1) (stBoostersOnMap s)]
+      }
 
 
 turn :: Int -> Bool -> State -> State
