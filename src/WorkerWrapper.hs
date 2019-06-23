@@ -80,11 +80,9 @@ step (s, ass) =
 
 
 wrap :: UArray Point Bool -> WrapperState -> Set Point
-wrap bm ws = Set.fromList $ p : [p1 | (xd,yd) <- Set.toList (wsManipulators ws), let p1 = (x+xd, y+yd), inField p1, Bitmap.isVisible bm p p1]
+wrap bm ws = Set.fromList $ p : [p1 | (xd,yd) <- Set.toList (wsManipulators ws), let p1 = (x+xd, y+yd), inRange (bounds bm) p1, Bitmap.isVisible bm p p1]
   where
     p@(x,y) = wsPosition ws
-    ((minX,minY),(maxX,maxY)) = bounds bm
-    inField (x',y') = minX <= x' && x' <= maxX && minY <= y' && y' <= maxY
 
 stepWrapper :: Int -> Action -> State -> State
 stepWrapper i a s = stepTime i $
@@ -252,5 +250,13 @@ clone i s
 -------------------------------------------------------------------------------------------
 -- high level API
 -------------------------------------------------------------------------------------------
-possibleActions :: State -> [Action]
-possibleActions = undefined
+possibleActions :: State -> Vector (WrapperState, [Action])
+possibleActions s = V.map (possible s) (stWrappers s)
+  where
+    possible :: State -> WrapperState -> (WrapperState, [Action])
+    possible s ws = (ws, [])
+      where
+        turns = []
+        -- 
+        (x,y) = wsPosition ws
+        moves = [p | p <- [(x,y+1),(x+1,y),(x,y-1),(x-1,y)], inRange (bounds (stMap s)) p, stMap s ! p]
