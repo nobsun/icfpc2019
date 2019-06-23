@@ -82,6 +82,19 @@ executables:
     - icfpc2019
     - bytestring
 
+  solver-simpleprime:
+    main:                solver-simpleprime.hs
+    source-dirs:         app
+    # ghc-options:
+    # - -threaded
+    # - -rtsopts
+    # - -with-rtsopts=-N
+    dependencies:
+    - base
+    - icfpc2019
+    - bytestring
+
+
 tests:
   icfpc2019-test:
     main:                spec.hs
