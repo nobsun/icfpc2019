@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1e8d63a55e350d32d24eb6f0966d2626ae946c82ab923e98e99dd0f85b26b7f8
+-- hash: e62e31644d96a19b2065059bc83b021347cf43f539b61b01f7abf0008673fdca
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -31,7 +31,9 @@ library
       Lib
       Problems
       Region
+      ShortestPath
       Solver
+      SolverSimple
       SubmitQueue
       Task
       WorkerWrapper
@@ -39,6 +41,7 @@ library
       Paths_icfpc2019
   hs-source-dirs:
       src
+  ghc-options: -Wall
   build-depends:
       array
     , attoparsec
@@ -48,15 +51,19 @@ library
     , directory
     , dlist
     , filepath
+    , hashable
+    , hashtables
+    , heaps
+    , mtl
     , process
     , text
     , time
     , time-locale-compat
     , transformers
     , unicode-show
+    , unordered-containers
     , vector
   default-language: Haskell2010
-  ghc-options: -Wall
 
 executable icfpc2019-exe
   main-is: Main.hs
@@ -67,6 +74,20 @@ executable icfpc2019-exe
   ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
+    , icfpc2019
+  default-language: Haskell2010
+
+executable solver-simple
+  main-is: solver-simple.hs
+  other-modules:
+      Main
+      Paths_icfpc2019
+  hs-source-dirs:
+      app
+  ghc-options: -Wall
+  build-depends:
+      base
+    , bytestring
     , icfpc2019
   default-language: Haskell2010
 
@@ -105,6 +126,7 @@ test-suite icfpc2019-doctest
       Paths_icfpc2019
   hs-source-dirs:
       test
+  ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
     , bytestring
@@ -115,7 +137,6 @@ test-suite icfpc2019-doctest
     , text
     , unicode-show
   default-language: Haskell2010
-  ghc-options: -Wall
 
 test-suite icfpc2019-test
   type: exitcode-stdio-1.0
@@ -125,6 +146,7 @@ test-suite icfpc2019-test
       Paths_icfpc2019
   hs-source-dirs:
       test
+  ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
     , bytestring
@@ -135,4 +157,3 @@ test-suite icfpc2019-test
     , text
     , unicode-show
   default-language: Haskell2010
-  ghc-options: -Wall
