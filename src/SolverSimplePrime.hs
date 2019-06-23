@@ -36,16 +36,16 @@ solve task = loop Seq.empty (WW.initialState task)
               return $
                 ( p
                 , [ (p', 1, act)
-                  | (dx,dy,act) <- [(-1,0,ActionA), (1,0,ActionD), (0,-1,ActionS), (0,1,ActionW)]
+                  | (dx,dy,act) <- [(-1,0,MoveLeft), (1,0,MoveRight), (0,-1,MoveDown), (0,1,MoveUp)]
                   , let p' = (x + dx, y + dy)
                   , inRange bs p'
                   , bm ! p'
                   ]
                 )
-        isActionB (ActionB _) = True
+        isActionB (AttachManipulator _) = True
         isActionB _ = False
-        isActionEQ ActionE = True
-        isActionEQ ActionQ = True
+        isActionEQ TurnCW = True
+        isActionEQ TurnCCW = True
         isActionEQ _ = False
         act' :: [Action]
         act' = if null bs then act1 else head bs:act1

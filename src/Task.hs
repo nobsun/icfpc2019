@@ -30,37 +30,37 @@ runPrinter :: Printer a -> a -> L8.ByteString
 runPrinter p = mconcat . DList.toList . execWriter . p
 
 data Action
-  = ActionW            -- ^ move up
-  | ActionS            -- ^ move down
-  | ActionA            -- ^ move left
-  | ActionD            -- ^ move right
-  | ActionZ            -- ^ do nothing
-  | ActionE            -- ^ turn 90 deg CW
-  | ActionQ            -- ^ turn 90 deg CCW
-  | ActionB (Int,Int)  -- ^ attach manipulator
-  | ActionF            -- ^ attach fast wheel
-  | ActionL            -- ^ start using drill
-  | ActionR            -- ^ reset beacon
-  | ActionT (Int, Int) -- ^ shift location
-  | ActionC            -- ^ clone
+  = MoveUp             -- ^ move up
+  | MoveDown           -- ^ move down
+  | MoveLeft           -- ^ move left
+  | MoveRight          -- ^ move right
+  | NoOp               -- ^ do nothing
+  | TurnCW             -- ^ turn 90 deg CW
+  | TurnCCW            -- ^ turn 90 deg CCW
+  | AttachManipulator (Int,Int)  -- ^ attach manipulator
+  | UseFastWheel       -- ^ attach fast wheel
+  | UseDrill           -- ^ start using drill
+  | Reset              -- ^ reset beacon
+  | Shift (Int, Int)   -- ^ shift location
+  | Clone              -- ^ clone
   deriving (Eq, Ord, Show)
 
 encodeAction :: Action -> L8.ByteString
 encodeAction = enc
   where
-    enc ActionW = "W"
-    enc ActionS = "S"
-    enc ActionA = "A"
-    enc ActionD = "D"
-    enc ActionZ = "Z"
-    enc ActionE = "E"
-    enc ActionQ = "Q"
-    enc (ActionB (x,y)) = "B(" <> L8.pack (show x) <> "," <> L8.pack (show y) <> ")"
-    enc ActionF = "F"
-    enc ActionL = "L"
-    enc ActionR = "R"
-    enc (ActionT (x,y)) = "T(" <> L8.pack (show x) <> "," <> L8.pack (show y) <> ")"
-    enc ActionC = "C"
+    enc MoveUp = "W"
+    enc MoveDown = "S"
+    enc MoveLeft = "A"
+    enc MoveRight = "D"
+    enc NoOp = "Z"
+    enc TurnCW = "E"
+    enc TurnCCW = "Q"
+    enc (AttachManipulator (x,y)) = "B(" <> L8.pack (show x) <> "," <> L8.pack (show y) <> ")"
+    enc UseFastWheel = "F"
+    enc UseDrill = "L"
+    enc Reset = "R"
+    enc (Shift (x,y)) = "T(" <> L8.pack (show x) <> "," <> L8.pack (show y) <> ")"
+    enc Clone = "C"
 
 printAction :: Printer Action
 printAction a = tell . pure $ encodeAction a
@@ -80,19 +80,19 @@ actionsP = many actionP
 
 actionP :: Parser Action
 actionP = msum
-  [ char 'W' *> pure ActionW
-  , char 'S' *> pure ActionS
-  , char 'A' *> pure ActionA
-  , char 'D' *> pure ActionD
-  , char 'Z' *> pure ActionZ
-  , char 'E' *> pure ActionE
-  , char 'Q' *> pure ActionQ
-  , ActionB <$> (char 'B' *> pointP)
-  , char 'F' *> pure ActionF
-  , char 'L' *> pure ActionL
-  , char 'R' *> pure ActionR
-  , ActionT <$> (char 'T' *> pointP)
-  , char 'C' *> pure ActionC
+  [ char 'W' *> pure MoveUp
+  , char 'S' *> pure MoveDown
+  , char 'A' *> pure MoveLeft
+  , char 'D' *> pure MoveRight
+  , char 'Z' *> pure NoOp
+  , char 'E' *> pure TurnCW
+  , char 'Q' *> pure TurnCCW
+  , AttachManipulator <$> (char 'B' *> pointP)
+  , char 'F' *> pure UseFastWheel
+  , char 'L' *> pure UseDrill
+  , char 'R' *> pure Reset
+  , Shift <$> (char 'T' *> pointP)
+  , char 'C' *> pure Clone
   ]
 
 type Solution = [Actions]
@@ -187,6 +187,69 @@ boosterCodeP = do
     'R' -> return BoosterR
     'C' -> return BoosterC
     _   -> fail ("Unknown booster code" ++ [c])
+
+
+-----------------------------------------------------
+-- 1.1 Block Puzzle
+--
+-- puzzle     ::= bNum, eNum, tSize, vMin, vMax, mNum, fNum, dNum, rNum, cNum, xNum # iSqs # oSqs
+-- iSqs, oSqs ::= repSep (point, ”, ”)
+--
+
+data Puzzle = Puzzle
+  { pzBlockNumber :: Int
+  , pzEpochNumber :: Int
+  , pzTotalSize   :: Int
+  , pzVerticsMin    :: Int
+  , pzVerticsMax    :: Int
+  , pzMNumber     :: Int
+  , pzFNumber     :: Int
+  , pzDNumber     :: Int
+  , pzRNumber     :: Int
+  , pzCNumber     :: Int
+  , pzXNumber     :: Int
+  , pzIncludes    :: [Point]
+  , pzExcludes    :: [Point]
+  }
+  deriving (Show)
+
+
+parsePuzzle :: L8.ByteString -> Either String Puzzle
+parsePuzzle = runParser (puzzleP <* endOfInput)
+
+
+-- | Parsing the task input. Here is an example from examples/puzzle_oga-001.cond:
+-- >>> parsePuzzle (L8.pack "1,1,10,4,20,0,0,0,0,0,0#(0,0)#(5,5)"
+-- Right (Puzzle {pzBlockNumber = 1, pzEpochNumber = 1, pzTotalSize = 10, pzVerticsMin = 4, pzVerticsMax = 20, pzMNumber = 0, pzFNumber = 0, pzDNumber = 0, pzRNumber = 0, pzCNumber = 0, pzXNumber = 0, pzIncludes = [(0,0)], pzExcludes = [(5,5)]})
+--
+
+puzzleP :: Parser Puzzle
+puzzleP =
+  Puzzle
+  <$> decimal    <* char ',' -- block
+  <*> decimal    <* char ',' -- epock
+  <*> decimal    <* char ',' -- total (tsize)
+  <*> decimal    <* char ',' -- vmin
+  <*> decimal    <* char ',' -- vmax
+  <*> decimal    <* char ',' -- m
+  <*> decimal    <* char ',' -- f
+  <*> decimal    <* char ',' -- d
+  <*> decimal    <* char ',' -- r
+  <*> decimal    <* char ',' -- c
+  <*> decimal                -- x
+  <* char '#'
+  <*> includesP
+  <* char '#'
+  <*> excludesP
+
+
+includesP :: Parser [Point]
+includesP = do
+  sepBy pointP (char ',')
+
+excludesP :: Parser [Point]
+excludesP = includesP
+
 
 -----
 
