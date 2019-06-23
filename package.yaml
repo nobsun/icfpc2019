@@ -42,7 +42,6 @@ library:
   - time
   - time-locale-compat
   - attoparsec
-  - dlist
   - unicode-show
   - unordered-containers
   - vector
