@@ -30,37 +30,37 @@ runPrinter :: Printer a -> a -> L8.ByteString
 runPrinter p = mconcat . DList.toList . execWriter . p
 
 data Action
-  = ActionW            -- ^ move up
-  | ActionS            -- ^ move down
-  | ActionA            -- ^ move left
-  | ActionD            -- ^ move right
-  | ActionZ            -- ^ do nothing
-  | ActionE            -- ^ turn 90 deg CW
-  | ActionQ            -- ^ turn 90 deg CCW
-  | ActionB (Int,Int)  -- ^ attach manipulator
-  | ActionF            -- ^ attach fast wheel
-  | ActionL            -- ^ start using drill
-  | ActionR            -- ^ reset beacon
-  | ActionT (Int, Int) -- ^ shift location
-  | ActionC            -- ^ clone
+  = MoveUp             -- ^ move up
+  | MoveDown           -- ^ move down
+  | MoveLeft           -- ^ move left
+  | MoveRight          -- ^ move right
+  | NoOp               -- ^ do nothing
+  | TurnCW             -- ^ turn 90 deg CW
+  | TurnCCW            -- ^ turn 90 deg CCW
+  | AttachManipulator (Int,Int)  -- ^ attach manipulator
+  | UseFastWheel       -- ^ attach fast wheel
+  | UseDrill           -- ^ start using drill
+  | Reset              -- ^ reset beacon
+  | Shift (Int, Int)   -- ^ shift location
+  | Clone              -- ^ clone
   deriving (Eq, Ord, Show)
 
 encodeAction :: Action -> L8.ByteString
 encodeAction = enc
   where
-    enc ActionW = "W"
-    enc ActionS = "S"
-    enc ActionA = "A"
-    enc ActionD = "D"
-    enc ActionZ = "Z"
-    enc ActionE = "E"
-    enc ActionQ = "Q"
-    enc (ActionB (x,y)) = "B(" <> L8.pack (show x) <> "," <> L8.pack (show y) <> ")"
-    enc ActionF = "F"
-    enc ActionL = "L"
-    enc ActionR = "R"
-    enc (ActionT (x,y)) = "T(" <> L8.pack (show x) <> "," <> L8.pack (show y) <> ")"
-    enc ActionC = "C"
+    enc MoveUp = "W"
+    enc MoveDown = "S"
+    enc MoveLeft = "A"
+    enc MoveRight = "D"
+    enc NoOp = "Z"
+    enc TurnCW = "E"
+    enc TurnCCW = "Q"
+    enc (AttachManipulator (x,y)) = "B(" <> L8.pack (show x) <> "," <> L8.pack (show y) <> ")"
+    enc UseFastWheel = "F"
+    enc UseDrill = "L"
+    enc Reset = "R"
+    enc (Shift (x,y)) = "T(" <> L8.pack (show x) <> "," <> L8.pack (show y) <> ")"
+    enc Clone = "C"
 
 printAction :: Printer Action
 printAction a = tell . pure $ encodeAction a
@@ -80,19 +80,19 @@ actionsP = many actionP
 
 actionP :: Parser Action
 actionP = msum
-  [ char 'W' *> pure ActionW
-  , char 'S' *> pure ActionS
-  , char 'A' *> pure ActionA
-  , char 'D' *> pure ActionD
-  , char 'Z' *> pure ActionZ
-  , char 'E' *> pure ActionE
-  , char 'Q' *> pure ActionQ
-  , ActionB <$> (char 'B' *> pointP)
-  , char 'F' *> pure ActionF
-  , char 'L' *> pure ActionL
-  , char 'R' *> pure ActionR
-  , ActionT <$> (char 'T' *> pointP)
-  , char 'C' *> pure ActionC
+  [ char 'W' *> pure MoveUp
+  , char 'S' *> pure MoveDown
+  , char 'A' *> pure MoveLeft
+  , char 'D' *> pure MoveRight
+  , char 'Z' *> pure NoOp
+  , char 'E' *> pure TurnCW
+  , char 'Q' *> pure TurnCCW
+  , AttachManipulator <$> (char 'B' *> pointP)
+  , char 'F' *> pure UseFastWheel
+  , char 'L' *> pure UseDrill
+  , char 'R' *> pure Reset
+  , Shift <$> (char 'T' *> pointP)
+  , char 'C' *> pure Clone
   ]
 
 type Solution = [Actions]

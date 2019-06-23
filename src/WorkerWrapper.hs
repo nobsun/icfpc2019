@@ -90,7 +90,7 @@ simulateSolution = loop
         n = V.length (stWrappers s)
 
     f (a:as) = (a, as)
-    f [] = (ActionZ, [])
+    f [] = (NoOp, [])
 
 
 wrap :: UArray Point Bool -> WrapperState -> Set Point
@@ -118,19 +118,19 @@ collectItem i s = s
 action :: Int -> Action -> State -> State
 action i a s =
   case a of
-    ActionW -> move i (0,1) s
-    ActionS -> move i (0,-1) s
-    ActionA -> move i (-1,0) s
-    ActionD -> move i (1,0) s
-    ActionZ -> s
-    ActionE -> turn i True s
-    ActionQ -> turn i False s
-    ActionB p -> attachNewManipulator i p s
-    ActionF -> attachFastWheel i s
-    ActionL -> useDrill i s
-    ActionR -> reset i s
-    ActionT p -> shift i p s
-    ActionC -> clone i s
+    MoveUp -> move i (0,1) s
+    MoveDown -> move i (0,-1) s
+    MoveLeft -> move i (-1,0) s
+    MoveRight -> move i (1,0) s
+    NoOp -> s
+    TurnCW -> turn i True s
+    TurnCCW -> turn i False s
+    AttachManipulator p -> attachNewManipulator i p s
+    UseFastWheel -> attachFastWheel i s
+    UseDrill -> useDrill i s
+    Reset -> reset i s
+    Shift p -> shift i p s
+    Clone -> clone i s
 
 
 stepTime :: Int -> State -> State
@@ -306,7 +306,7 @@ simulate1Step s i = Prelude.map (\(x, xs) -> let s' = step xs s in (x, s', eval 
     commands = Prelude.map (\a -> gen a) ithCand
       where
         gen :: Action -> (Action, [Action])
-        gen a = (a, V.toList $ V.imap (\j _ -> if i == j then a else ActionZ) candidates)
+        gen a = (a, V.toList $ V.imap (\j _ -> if i == j then a else NoOp) candidates)
     candidates :: Vector [Action]
     candidates = V.map snd $ validActions s
     ithCand :: [Action]
@@ -325,29 +325,29 @@ validActions s = V.map valid (stWrappers s)
         -- 現在位置
         pos@(x,y) = wsPosition ws
         -- 移動候補
-        moves = [a | (p, a) <- [((x,y+1), ActionW),((x+1,y), ActionD),((x,y-1), ActionS),((x-1,y), ActionA)]
+        moves = [a | (p, a) <- [((x,y+1), MoveUp),((x+1,y), MoveRight),((x,y-1), MoveDown),((x-1,y), MoveLeft)]
                    , inRange (bounds (stMap s)) p, stMap s ! p]
         -- 転回候補
-        turns = [ActionE, ActionQ]
+        turns = [TurnCW, TurnCCW]
         -- 保有ブースター
         bs = stBoostersCollected s
         actF, actL, actC, actR, actT, actB, actZ :: [Action]
         -- スピードアップ
-        actF = if (Map.findWithDefault 0 BoosterF bs) > 0 then return ActionF else fail "Not FastWheel"
+        actF = if (Map.findWithDefault 0 BoosterF bs) > 0 then return UseFastWheel else fail "Not FastWheel"
         -- ドリル使用
-        actL = if (Map.findWithDefault 0 BoosterL bs) > 0 then return ActionL else fail "Not Drill"
+        actL = if (Map.findWithDefault 0 BoosterL bs) > 0 then return UseDrill else fail "Not Drill"
         -- クローン
-        actC = if (Map.findWithDefault 0 BoosterC bs) > 0 then return ActionC else fail "Not Clone"
+        actC = if (Map.findWithDefault 0 BoosterC bs) > 0 then return Clone else fail "Not Clone"
         -- リセット
-        actR = if (Map.findWithDefault 0 BoosterR bs) > 0 then return ActionR else fail "Not Reset"
+        actR = if (Map.findWithDefault 0 BoosterR bs) > 0 then return Reset else fail "Not Reset"
         -- シフト
-        actT = map ActionT (Set.toList (stTeleportBeacons s))
+        actT = map Shift (Set.toList (stTeleportBeacons s))
         -- マニピュレータ追加
         actB = if (Map.findWithDefault 0 BoosterB bs) > 0 then ms else fail "No Manipulator"
           where
-            ms = map ActionB (Set.toList $ arounds Set.\\ wsbody)
+            ms = map AttachManipulator (Set.toList $ arounds Set.\\ wsbody)
         -- ウェイト
-        actZ = if V.length (stWrappers s) > 0 then return ActionZ else fail "Nop NO NEED"
+        actZ = if V.length (stWrappers s) > 0 then return NoOp else fail "Nop NO NEED"
         wsbody = Set.insert pos (wsManipulators ws)
         arounds = Set.unions (Set.toList (Set.map around wsbody))
           where
