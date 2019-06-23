@@ -33,7 +33,7 @@ main :: IO ()
 main = do
   (nd:_) <- getArgs -- newDirの末尾は'/'が必要
   let newDir = if last nd == '/' then nd else nd ++ "/"
-  forM_ (map mkNNN [1..150]) $ \nnn -> do
+  forM_ (map mkNNN [1..300]) $ \nnn -> do
     let (old, new) = (f nnn oldDir, f nnn newDir)
     (szo, szn) <- (,) <$> timeSize old <*> timeSize new
     if szo > szn
