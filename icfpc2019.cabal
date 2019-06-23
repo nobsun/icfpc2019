@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e5484210bf1e7d88c8a8ca815ce008db17dd40db64a3dfb36710bf5b3ad6609b
+-- hash: 1b530820cca61f0d90ad43c40076f4dcba426a699ccd3b5d7eacc966235847e2
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -78,6 +78,32 @@ executable solver
     , optparse-applicative
   default-language: Haskell2010
 
+executable solver-simple
+  main-is: solver-simple.hs
+  other-modules:
+      Paths_icfpc2019
+  hs-source-dirs:
+      app
+  ghc-options: -Wall
+  build-depends:
+      base
+    , bytestring
+    , icfpc2019
+  default-language: Haskell2010
+
+executable solver-simpleprime
+  main-is: solver-simpleprime.hs
+  other-modules:
+      Paths_icfpc2019
+  hs-source-dirs:
+      app
+  ghc-options: -Wall
+  build-depends:
+      base
+    , bytestring
+    , icfpc2019
+  default-language: Haskell2010
+
 executable submit-gateway
   main-is: gateway.hs
   other-modules:
@@ -107,27 +133,6 @@ test-suite icfpc2019-doctest
   type: exitcode-stdio-1.0
   main-is: doctests.hs
   other-modules:
-      LibSpec
-      Paths_icfpc2019
-  hs-source-dirs:
-      test
-  ghc-options: -Wall
-  build-depends:
-      base >=4.7 && <5
-    , bytestring
-    , doctest
-    , hspec
-    , icfpc2019
-    , main-tester
-    , text
-    , unicode-show
-  default-language: Haskell2010
-
-test-suite icfpc2019-test
-  type: exitcode-stdio-1.0
-  main-is: spec.hs
-  other-modules:
-      LibSpec
       Paths_icfpc2019
   hs-source-dirs:
       test

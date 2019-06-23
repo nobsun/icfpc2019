@@ -85,22 +85,6 @@ executables:
 
 
 tests:
-  icfpc2019-test:
-    main:                spec.hs
-    source-dirs:         test
-    # ghc-options:
-    # - -threaded
-    # - -rtsopts
-    # - -with-rtsopts=-N
-    dependencies:
-    - icfpc2019
-    - bytestring
-    - text
-    - unicode-show
-    - doctest
-    - hspec
-    - main-tester
-
   icfpc2019-doctest:
     main:                doctests.hs
     source-dirs:         test
