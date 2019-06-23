@@ -34,7 +34,6 @@ library
       SubmitQueue
       Task
       WorkerWrapper
-      WorkerWrapper2
   other-modules:
       Paths_icfpc2019
   hs-source-dirs:
