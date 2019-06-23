@@ -83,8 +83,8 @@ wrap :: UArray Point Bool -> WrapperState -> Set Point
 wrap bm ws = Set.fromList $ p : [p1 | (xd,yd) <- Set.toList (wsManipulators ws), let p1 = (x+xd, y+yd), inField p1, Bitmap.isVisible bm p p1]
   where
     p@(x,y) = wsPosition ws
-    (_,(maxX,maxY)) = bounds bm
-    inField (x',y') = 0 <= x' && x' <= maxX && 0 <= y' && y' <= maxY
+    ((minX,minY),(maxX,maxY)) = bounds bm
+    inField (x',y') = minX <= x' && x' <= maxX && minY <= y' && y' <= maxY
 
 stepWrapper :: Int -> Action -> State -> State
 stepWrapper i a s = stepTime i $
