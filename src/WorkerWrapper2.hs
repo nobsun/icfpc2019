@@ -26,6 +26,7 @@ data State
   = State
   { stMap :: UArray Point Bool -- True が通行可能で、 False がマップ外もしくは障害物
   , stUnwrapped :: Set Point
+  , stSpawnPoints :: Set Point
   , stTeleportBeacons :: Set Point
   , stBoostersCollected :: Map BoosterCode Int
   , stBoostersOnMap :: Map Point [BoosterCode]
@@ -39,9 +40,10 @@ initialState task =
   State
   { stMap = bm
   , stUnwrapped = us Set.\\ wrap bm w0
+  , stSpawnPoints = Set.fromList [p | (b,p) <- taskBoosters task, b == BoosterX]
   , stTeleportBeacons = Set.empty
   , stBoostersCollected = Map.empty
-  , stBoostersOnMap = Map.fromListWith (++) [(p,[b]) | (b,p) <- taskBoosters task]
+  , stBoostersOnMap = Map.fromListWith (++) [(p,[b]) | (b,p) <- taskBoosters task, b /= BoosterX]
   , stWrappers = V.singleton w0
   }
   where
@@ -118,9 +120,9 @@ move' i (dx,dy) s
     , stUnwrapped = stUnwrapped s Set.\\ wrap map1 w1
     , stBoostersCollected =
         Map.unionWith (+) (stBoostersCollected s) $
-          Map.fromList [(b,1) | b <- Map.findWithDefault [] (x1,y1) (stBoostersOnMap s), b /= BoosterX]
+          Map.fromList [(b,1) | b <- Map.findWithDefault [] (x1,y1) (stBoostersOnMap s)]
     , stBoostersOnMap =
-        Map.adjust (\bs -> [b | b <- bs, b == BoosterX]) (x1,y1) (stBoostersOnMap s)
+        Map.delete (x1,y1) (stBoostersOnMap s)
     , stWrappers =
         stWrappers s V.// [(i, w1)]
     }
@@ -195,7 +197,7 @@ reset :: Int -> State -> State
 reset i s
   | Map.findWithDefault 0 BoosterR (stBoostersCollected s) <= 0  = error "reset not available"
   | p `Set.member` stTeleportBeacons s = error "cannot install teleport beacon"
-  | BoosterX `elem` Map.findWithDefault [] p (stBoostersOnMap s) = error "cannot install teleport beacon"
+  | p `Set.member` stSpawnPoints s = error "cannot install teleport beacon"
   | otherwise =
       s
       { stBoostersCollected = Map.adjust (subtract 1) BoosterR (stBoostersCollected s)
@@ -221,7 +223,7 @@ shift i p s
 clone :: Int -> State -> State
 clone i s
   | Map.findWithDefault 0 BoosterC (stBoostersCollected s) <= 0 = error "cloning not available"
-  | not (BoosterX `elem` Map.findWithDefault [] p (stBoostersOnMap s)) = error "not a spawn point"
+  | p `Set.notMember` stSpawnPoints s = error "not a spawn point"
   | otherwise =
       s
       { stUnwrapped = stUnwrapped s Set.\\ wrap (stMap s) w2
