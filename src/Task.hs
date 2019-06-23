@@ -188,6 +188,69 @@ boosterCodeP = do
     'C' -> return BoosterC
     _   -> fail ("Unknown booster code" ++ [c])
 
+
+-----------------------------------------------------
+-- 1.1 Block Puzzle
+--
+-- puzzle     ::= bNum, eNum, tSize, vMin, vMax, mNum, fNum, dNum, rNum, cNum, xNum # iSqs # oSqs
+-- iSqs, oSqs ::= repSep (point, ”, ”)
+--
+
+data Puzzle = Puzzle
+  { pzBlockNumber :: Int
+  , pzEpochNumber :: Int
+  , pzTotalSize   :: Int
+  , pzVerticsMin    :: Int
+  , pzVerticsMax    :: Int
+  , pzMNumber     :: Int
+  , pzFNumber     :: Int
+  , pzDNumber     :: Int
+  , pzRNumber     :: Int
+  , pzCNumber     :: Int
+  , pzXNumber     :: Int
+  , pzIncludes    :: [Point]
+  , pzExcludes    :: [Point]
+  }
+  deriving (Show)
+
+
+parsePuzzle :: L8.ByteString -> Either String Puzzle
+parsePuzzle = runParser (puzzleP <* endOfInput)
+
+
+-- | Parsing the task input. Here is an example from examples/puzzle_oga-001.cond:
+-- >>> parsePuzzle (L8.pack "1,1,10,4,20,0,0,0,0,0,0#(0,0)#(5,5)"
+-- Right (Puzzle {pzBlockNumber = 1, pzEpochNumber = 1, pzTotalSize = 10, pzVerticsMin = 4, pzVerticsMax = 20, pzMNumber = 0, pzFNumber = 0, pzDNumber = 0, pzRNumber = 0, pzCNumber = 0, pzXNumber = 0, pzIncludes = [(0,0)], pzExcludes = [(5,5)]})
+--
+
+puzzleP :: Parser Puzzle
+puzzleP =
+  Puzzle
+  <$> decimal    <* char ',' -- block
+  <*> decimal    <* char ',' -- epock
+  <*> decimal    <* char ',' -- total (tsize)
+  <*> decimal    <* char ',' -- vmin
+  <*> decimal    <* char ',' -- vmax
+  <*> decimal    <* char ',' -- m
+  <*> decimal    <* char ',' -- f
+  <*> decimal    <* char ',' -- d
+  <*> decimal    <* char ',' -- r
+  <*> decimal    <* char ',' -- c
+  <*> decimal                -- x
+  <* char '#'
+  <*> includesP
+  <* char '#'
+  <*> excludesP
+
+
+includesP :: Parser [Point]
+includesP = do
+  sepBy pointP (char ',')
+
+excludesP :: Parser [Point]
+excludesP = includesP
+
+
 -----
 
 runParser :: Parser a -> L8.ByteString -> Either String a
