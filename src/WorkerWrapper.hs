@@ -1,6 +1,7 @@
 module WorkerWrapper where
 
 import Data.Array.Unboxed
+import Data.Function (on)
 import Data.List
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -79,6 +80,7 @@ simulateSolution :: [[Action]] -> State -> State
 simulateSolution = loop
   where
     loop :: [[Action]] -> State -> State
+    loop ass s | all null ass = s
     loop ass s =
       case splitAt n ass of
         (ass1, ass2) ->
@@ -137,8 +139,8 @@ stepTime i s =
   { stWrappers = stWrappers s V.// [(i, w1)]
   }
   where
-    WrapperState{ wsFastWheelRemainingTime = t1, wsDrillRemainingTime = t2 }  = stWrappers s V.! i
-    w1 = w1{ wsFastWheelRemainingTime = min 0 t1, wsDrillRemainingTime = min 0 t2 }
+    w0@WrapperState{ wsFastWheelRemainingTime = t1, wsDrillRemainingTime = t2 }  = stWrappers s V.! i
+    w1 = w0{ wsFastWheelRemainingTime = min 0 t1, wsDrillRemainingTime = min 0 t2 }
 
 
 move :: Int -> Point -> State -> State
@@ -282,14 +284,42 @@ clone i s
 -------------------------------------------------------------------------------------------
 -- high level API
 -------------------------------------------------------------------------------------------
-possibleActions :: State -> Vector (WrapperState, [Action])
-possibleActions s = V.map possible (stWrappers s)
+type Score = Int
+fst3 (x,_,_) = x
+snd3 (_,y,_) = y
+thd3 (_,_,z) = z
+
+decide :: State -> Int -> Maybe (Action, State, Score)
+decide s i = if e == 0 then Nothing else Just (a, s', e)
   where
-    possible :: WrapperState -> (WrapperState, [Action])
-    possible ws = (ws, candidates)
+    (a, s', e) = head $ sortBy (compare `on` thd3) $ simulate1Step s i
+
+-- i番目のwrapperだけで他のwrapperの進行は考えず(動かないものとして)に読む
+simulate1Step :: State -> Int -> [(Action, State, Score)]
+simulate1Step s i = Prelude.map (\(x, xs) -> let s' = step xs s in (x, s', eval s')) commands
+  where
+    eval :: State -> Score
+    eval = Set.size . stUnwrapped
+    -- i番目のwrapperへのコマンドと全wrapperへのアクションのリストとの
+    -- タプルのリスト
+    commands :: [(Action, [Action])]
+    commands = Prelude.map (\a -> gen a) ithCand
       where
-        -- 候補手
-        candidates = if done then [] else  moves ++ turns ++ actF ++ actL ++ actC ++ actR ++ actT ++ actB ++ actZ
+        gen :: Action -> (Action, [Action])
+        gen a = (a, V.toList $ V.imap (\j _ -> if i == j then a else ActionZ) candidates)
+    candidates :: Vector [Action]
+    candidates = V.map snd $ validActions s
+    ithCand :: [Action]
+    ithCand = candidates V.! i
+
+validActions :: State -> Vector (WrapperState, [Action])
+validActions s = V.map valid (stWrappers s)
+  where
+    valid :: WrapperState -> (WrapperState, [Action])
+    valid ws = (ws, candidates)
+      where
+        -- 候補手(まずは移動と転回のみ)
+        candidates = if done then [] else  moves ++ turns ++ actB -- ++ actF ++ actL ++ actC ++ actR ++ actT ++ actZ
         -- フロンティアがなくなった
         done = Set.null $ stUnwrapped s
         -- 現在位置
@@ -301,18 +331,21 @@ possibleActions s = V.map possible (stWrappers s)
         turns = [ActionE, ActionQ]
         -- 保有ブースター
         bs = stBoostersCollected s
+        actF, actL, actC, actR, actT, actB, actZ :: [Action]
         -- スピードアップ
-        actF = if (Map.findWithDefault 0 BoosterF bs) > 0 then return ActionF else fail "Not Found FastWheel"
+        actF = if (Map.findWithDefault 0 BoosterF bs) > 0 then return ActionF else fail "Not FastWheel"
         -- ドリル使用
-        actL = if (Map.findWithDefault 0 BoosterL bs) > 0 then return ActionL else fail "Not Found Drill"
+        actL = if (Map.findWithDefault 0 BoosterL bs) > 0 then return ActionL else fail "Not Drill"
         -- クローン
-        actC = if (Map.findWithDefault 0 BoosterC bs) > 0 then return ActionC else fail "Not Found Clone"
+        actC = if (Map.findWithDefault 0 BoosterC bs) > 0 then return ActionC else fail "Not Clone"
         -- リセット
-        actR = if (Map.findWithDefault 0 BoosterR bs) > 0 then return ActionR else fail "Not Found Reset"
+        actR = if (Map.findWithDefault 0 BoosterR bs) > 0 then return ActionR else fail "Not Reset"
         -- シフト
         actT = map ActionT (Set.toList (stTeleportBeacons s))
         -- マニピュレータ追加
-        actB = map ActionB (Set.toList $ arounds Set.\\ wsbody)
+        actB = if (Map.findWithDefault 0 BoosterB bs) > 0 then ms else fail "No Manipulator"
+          where
+            ms = map ActionB (Set.toList $ arounds Set.\\ wsbody)
         -- ウェイト
         actZ = if V.length (stWrappers s) > 0 then return ActionZ else fail "Nop NO NEED"
         wsbody = Set.insert pos (wsManipulators ws)
