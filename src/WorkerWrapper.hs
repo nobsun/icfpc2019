@@ -200,18 +200,20 @@ turn i isClockwise s =
 
 
 attachNewManipulator :: Int -> (Int,Int) -> State -> State
-attachNewManipulator i (dx,dy) s
-  | Set.null (ms `Set.intersection` Set.fromList [(x1+1, y1), (x1-1, y1), (x1, y1+1), (x1, y1-1)]) = error "cannot attach"
+attachNewManipulator i relpos@(dx,dy) s
+  | not (Set.member relpos attachable) = error "cannot attach"
   | otherwise =
       s
       { stUnwrapped = stUnwrapped s Set.\\ wrap (stMap s) w1
       , stWrappers  = stWrappers s V.// [(i, w1)]
+      , stBoostersCollected = Map.adjust (subtract 1) BoosterB (stBoostersCollected s)
       }
   where
     w0@WrapperState{ wsPosition = (x,y), wsManipulators = ms } = stWrappers s V.! i
-    x1 = x + dx
-    y1 = y + dy
-    w1 = w0{ wsManipulators = Set.insert (x1,y1) ms }
+    attachable :: Set Point
+    attachable = arounds w0
+    (x1, y1) = (x + dx, y + dy)
+    w1 = w0{ wsManipulators = Set.insert relpos ms }
 
 
 attachFastWheel :: Int -> State -> State
@@ -345,11 +347,14 @@ validActions s = V.map valid (stWrappers s)
         -- マニピュレータ追加
         actB = if (Map.findWithDefault 0 BoosterB bs) > 0 then ms else fail "No Manipulator"
           where
-            ms = map ActionB (Set.toList $ arounds Set.\\ wsbody)
+            ms = map ActionB (Set.toList $ arounds ws)
         -- ウェイト
         actZ = if V.length (stWrappers s) > 0 then return ActionZ else fail "Nop NO NEED"
-        wsbody = Set.insert (0,0) (wsManipulators ws)
-        arounds = Set.unions (Set.toList (Set.map around wsbody))
-          where
-            around :: Point -> Set Point
-            around (x', y') = Set.fromList [(x',y'+1),(x'+1,y'),(x',y'-1),(x'-1,y')]
+
+arounds :: WrapperState -> Set Point
+arounds ws = Set.unions (Set.toList (Set.map around wsbody)) Set.\\ wsbody
+  where
+    wsbody :: Set Point
+    wsbody = Set.insert (0,0) (wsManipulators ws)
+    around :: Point -> Set Point
+    around (x,y) = Set.fromList [(x,y+1),(x+1,y),(x,y-1),(x-1,y)]
