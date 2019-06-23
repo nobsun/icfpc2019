@@ -80,6 +80,7 @@ simulateSolution :: [[Action]] -> State -> State
 simulateSolution = loop
   where
     loop :: [[Action]] -> State -> State
+    loop ass s | all null ass = s
     loop ass s =
       case splitAt n ass of
         (ass1, ass2) ->
@@ -138,8 +139,8 @@ stepTime i s =
   { stWrappers = stWrappers s V.// [(i, w1)]
   }
   where
-    WrapperState{ wsFastWheelRemainingTime = t1, wsDrillRemainingTime = t2 }  = stWrappers s V.! i
-    w1 = w1{ wsFastWheelRemainingTime = min 0 t1, wsDrillRemainingTime = min 0 t2 }
+    w0@WrapperState{ wsFastWheelRemainingTime = t1, wsDrillRemainingTime = t2 }  = stWrappers s V.! i
+    w1 = w0{ wsFastWheelRemainingTime = min 0 t1, wsDrillRemainingTime = min 0 t2 }
 
 
 move :: Int -> Point -> State -> State
@@ -288,8 +289,10 @@ fst3 (x,_,_) = x
 snd3 (_,y,_) = y
 thd3 (_,_,z) = z
 
-decide :: State -> Int -> Action
-decide s i = fst3 $ head $ sortBy (compare `on` thd3) $ simulate1Step s i
+decide :: State -> Int -> Maybe Action
+decide s i = if e == 0 then Nothing else Just a
+  where
+    (a, s', e) = head $ sortBy (compare `on` thd3) $ simulate1Step s i
 
 -- i番目のwrapperだけで他のwrapperの進行は考えず(動かないものとして)に読む
 simulate1Step :: State -> Int -> [(Action, State, Score)]
@@ -333,7 +336,8 @@ validActions s = V.map valid (stWrappers s)
         -- ドリル使用
         actL = if (Map.findWithDefault 0 BoosterL bs) > 0 then return ActionL else fail "Not Drill"
         -- クローン
-        actC = if (Map.findWithDefault 0 BoosterC bs) > 0 then return ActionC else fail "Not Clone"
+        actC = []
+--        actC = if (Map.findWithDefault 0 BoosterC bs) > 0 then return ActionC else fail "Not Clone"
         -- リセット
         actR = if (Map.findWithDefault 0 BoosterR bs) > 0 then return ActionR else fail "Not Reset"
         -- シフト

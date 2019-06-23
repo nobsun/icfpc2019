@@ -10,3 +10,8 @@ readProb path = return . initState =<< BL.readFile path
   
 initState :: ByteString -> State
 initState = either error initialState . parseTask . BL.init
+
+-- クローンしない
+singleTest = do
+  s <- readProb "examples/example-01.desc"
+  return ()
