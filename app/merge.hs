@@ -7,11 +7,6 @@ import System.Environment
 import System.Exit
 import System.IO
 
-solDirs :: (FilePath, FilePath)
--- solDirs = ("solutions-merged/","solutions-simple-solver/")
-solDirs = ("solutions-merged/","solutions-solver-simpleprime/")
-(oldDir, newDir) = solDirs
-
 mkNNN :: Int -> String
 mkNNN n | 1 <= n && n <10 = "00" ++ show n
         | 10 <= n && n <= 99 = "0" ++ show n
@@ -36,6 +31,8 @@ timeSize' = sub 0
 
 main :: IO ()
 main = do
+  (nd:_) <- getArgs -- newDirの末尾は'/'が必要
+  let newDir = if last nd == '/' then nd else nd ++ "/"
   forM_ (map mkNNN [1..150]) $ \nnn -> do
     let (old, new) = (f nnn oldDir, f nnn newDir)
     (szo, szn) <- (,) <$> timeSize old <*> timeSize new
@@ -44,3 +41,4 @@ main = do
       else return ()
   where
     f n d = d ++ "prob-" ++ n ++ ".sol"
+    oldDir = "solutions-merged/"
