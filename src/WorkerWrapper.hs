@@ -139,8 +139,8 @@ stepTime i s =
   { stWrappers = stWrappers s V.// [(i, w1)]
   }
   where
-    WrapperState{ wsFastWheelRemainingTime = t1, wsDrillRemainingTime = t2 }  = stWrappers s V.! i
-    w1 = w1{ wsFastWheelRemainingTime = min 0 t1, wsDrillRemainingTime = min 0 t2 }
+    w0@WrapperState{ wsFastWheelRemainingTime = t1, wsDrillRemainingTime = t2 }  = stWrappers s V.! i
+    w1 = w0{ wsFastWheelRemainingTime = min 0 t1, wsDrillRemainingTime = min 0 t2 }
 
 
 move :: Int -> Point -> State -> State
