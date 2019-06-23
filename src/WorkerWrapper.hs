@@ -264,7 +264,7 @@ possibleActions :: State -> Vector (WrapperState, [Action])
 possibleActions s = V.map possible (stWrappers s)
   where
     possible :: WrapperState -> (WrapperState, [Action])
-    possible ws = (ws, moves ++ turns ++ actF ++ actL ++ actC ++ actR ++ actT ++ actB)
+    possible ws = (ws, moves ++ turns ++ actF ++ actL ++ actC ++ actR ++ actT ++ actB ++ actZ)
       where
         pos@(x,y) = wsPosition ws
         -- 移動候補
@@ -286,6 +286,8 @@ possibleActions s = V.map possible (stWrappers s)
         actT = map ActionT (Set.toList (stTeleportBeacons s))
         -- マニピュレータ追加
         actB = map ActionB (Set.toList $ arounds Set.\\ wsbody)
+        -- ウェイト
+        actZ = if V.length (stWrappers s) > 0 then return ActionZ else fail "Nop NO NEED"
         wsbody = Set.insert pos (wsManipulators ws)
         arounds = Set.unions (Set.toList (Set.map around wsbody))
           where
