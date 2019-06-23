@@ -34,6 +34,7 @@ library
       ShortestPath
       Solver
       SolverSimple
+      SolverSimplePrime
       SubmitQueue
       Task
       WorkerWrapper
@@ -79,6 +80,20 @@ executable icfpc2019-exe
 
 executable solver-simple
   main-is: solver-simple.hs
+  other-modules:
+      Main
+      Paths_icfpc2019
+  hs-source-dirs:
+      app
+  ghc-options: -Wall
+  build-depends:
+      base
+    , bytestring
+    , icfpc2019
+  default-language: Haskell2010
+
+executable solver-simpleprime
+  main-is: solver-simpleprime.hs
   other-modules:
       Main
       Paths_icfpc2019

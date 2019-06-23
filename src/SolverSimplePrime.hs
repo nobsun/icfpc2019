@@ -5,6 +5,7 @@ module SolverSimplePrime where
 import Data.Array.IArray
 import qualified Data.Foldable as F
 import qualified Data.HashMap.Strict as HashMap
+import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import qualified Data.Vector as V
@@ -41,8 +42,11 @@ solve task = loop Seq.empty (WW.initialState task)
                   , bm ! p'
                   ]
                 )
+        validActs = V.map snd $ WW.validActions s
+        act1 :: [Action]
+        act1 = take 1 actions
         actions :: [Action]
-        actions = take 1 $ head $
+        actions = head $
           [ [act | (_,_,_,act) <- SP.pathEdges path']
           | (p1, _cost, path') <- SP.dijkstraIncremental SP.path g [p0]
           , p1 /= p0
