@@ -78,7 +78,6 @@ executables:
     # - -rtsopts
     # - -with-rtsopts=-N
     dependencies:
-    - base
     - icfpc2019
     - bytestring
     - optparse-applicative

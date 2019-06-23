@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 63442da24ac64ad255cd4d2b376ce98370a2e1ebfcbcad0a39c9b53e8bac48d6
+-- hash: 1ce9b96f213fab7e545148ae3092034f148175bd6d795f1d095979e89ce847a5
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -86,7 +86,7 @@ executable solver
       app
   ghc-options: -Wall
   build-depends:
-      base
+      base >=4.7 && <5
     , bytestring
     , icfpc2019
     , optparse-applicative
