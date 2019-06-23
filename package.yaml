@@ -45,6 +45,7 @@ library:
   - unicode-show
   - unordered-containers
   - vector
+  - toysolver
 
   source-dirs: src
 

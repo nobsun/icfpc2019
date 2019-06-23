@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e770d27a1d8124ea68d8e1838b7424e9935cd1b5df1b26de0fd3401239e41a44
+-- hash: 0b3bcf35dd373b376edbd0fe252bc6033170ef805e907107ea582e41d6772d7f
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
   exposed-modules:
       Bitmap
       Problems
+      PuzzleSolver
       Region
       ShortestPath
       Solver
@@ -58,6 +59,7 @@ library
     , text
     , time
     , time-locale-compat
+    , toysolver
     , transformers
     , unicode-show
     , unordered-containers
@@ -76,21 +78,6 @@ executable solver
     , bytestring
     , icfpc2019
     , optparse-applicative
-  default-language: Haskell2010
-
-executable merge
-  main-is: merge.hs
-  other-modules:
-      Main
-      Paths_icfpc2019
-  hs-source-dirs:
-      app
-  ghc-options: -Wall
-  build-depends:
-      base
-    , bytestring
-    , directory
-    , icfpc2019
   default-language: Haskell2010
 
 executable submit-gateway

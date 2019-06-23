@@ -2,3 +2,16 @@ resolver: lts-12.26
 
 packages:
 - .
+
+extra-deps:
+- git: https://github.com/msakai/toysolver.git
+  commit: 60e7e41c178d931709d98fcbc2ca4eebf8dea9cd
+- multiset-0.3.4.1
+- queue-0.1.2
+- OptDir-0.0.3
+- data-interval-1.3.0
+- extended-reals-0.2.2.0
+- finite-field-0.9.0
+- pseudo-boolean-0.1.8.0
+- sign-0.4.3
+- bytestring-encoding-0.1.0.0
