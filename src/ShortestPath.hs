@@ -57,6 +57,7 @@ module ShortestPath
   -- * Shortest-path algorithms
   , bellmanFord
   , dijkstra
+  , dijkstraIncremental
   , floydWarshall
 
   -- * Utility functions
@@ -383,6 +384,40 @@ dijkstra (Fold fV fE fC (fD :: x -> a)) g ss =
                        , not (ch `HashMap.member` visited)
                        ]
               in loop (Heap.union q' q2) (HashMap.insert v (Pair c a) visited)
+
+-- | Dijkstra's algorithm for finding shortest paths from source vertexes
+-- to all of the other vertices in a weighted graph with non-negative edge
+-- weight.
+--
+-- It compute shortest-paths from given source vertexes, and folds edge
+-- information along shortest paths using a given 'Fold' operation.
+dijkstraIncremental
+  :: forall vertex cost label a. (Eq vertex, Hashable vertex, Real cost)
+  => Fold vertex cost label a
+     -- ^ Operation used to fold shotest paths
+  -> Graph vertex cost label
+  -> [vertex]
+     -- ^ List of source vertexes
+  -> [(vertex, cost, a)]
+dijkstraIncremental (Fold fV fE fC (fD :: x -> a)) g ss =
+  loop (Heap.fromList [Heap.Entry 0 (Pair s (fV s)) | s <- ss]) HashMap.empty
+  where
+    loop
+      :: Heap.Heap (Heap.Entry cost (Pair vertex x))
+      -> HashMap vertex (Pair cost x)
+      -> [(vertex, cost, a)]
+    loop q visited =
+      case Heap.viewMin q of
+        Nothing -> []
+        Just (Heap.Entry c (Pair v a), q')
+          | v `HashMap.member` visited -> loop q' visited
+          | otherwise ->
+              let q2 = Heap.fromList
+                       [ Heap.Entry (c+c') (Pair ch (a `fC` fE (v,ch,c',l)))
+                       | (ch,c',l) <- HashMap.lookupDefault [] v g
+                       , not (ch `HashMap.member` visited)
+                       ]
+              in (v, c, fD a) : loop (Heap.union q' q2) (HashMap.insert v (Pair c a) visited)
 
 -- ------------------------------------------------------------------------
 
