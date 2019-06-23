@@ -49,7 +49,7 @@ solve task = loop Seq.empty s0 bm0 (generateGraph bm0)
           where bs  = filter isActionB validActs
                 eqs = filter isActionEQ validActs
         validActs :: [Action]
-        validActs = maybe [] (\(a,_,_) -> [a]) $ WW.decide s 0 -- V.map snd (WW.validActions s) V.! 0
+        validActs = maybe [] (\(a,_,e) -> if e < Set.size (WW.stUnwrapped s) then [a] else []) $ WW.decide s 0 -- V.map snd (WW.validActions s) V.! 0
         act1 :: [Action]
         act1 = take 1 actions
         actions :: [Action]
