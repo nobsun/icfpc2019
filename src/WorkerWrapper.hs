@@ -348,7 +348,7 @@ validActions s = V.map valid (stWrappers s)
             ms = map ActionB (Set.toList $ arounds Set.\\ wsbody)
         -- ウェイト
         actZ = if V.length (stWrappers s) > 0 then return ActionZ else fail "Nop NO NEED"
-        wsbody = Set.insert pos (wsManipulators ws)
+        wsbody = Set.insert (0,0) (wsManipulators ws)
         arounds = Set.unions (Set.toList (Set.map around wsbody))
           where
             around :: Point -> Set Point

@@ -22,8 +22,8 @@ solve task = loop Seq.empty (WW.initialState task)
       | Set.null (WW.stUnwrapped s) = [F.toList hist]
       | otherwise =
           loop
-            (hist <> Seq.fromList actions)
-            (WW.simulateSolution [actions] s)
+            (hist <> Seq.fromList act')
+            (WW.simulateSolution [act'] s)
       where
         bm = WW.stMap s
         bs = bounds bm
@@ -42,7 +42,17 @@ solve task = loop Seq.empty (WW.initialState task)
                   , bm ! p'
                   ]
                 )
-        validActs = V.map snd $ WW.validActions s
+        isActionB (ActionB _) = True
+        isActionB _ = False
+        isActionEQ ActionE = True
+        isActionEQ ActionQ = True
+        isActionEQ _ = False
+        act' :: [Action]
+        act' = if null bs then act1 else head bs:act1
+          where bs  = filter isActionB validActs
+                eqs = filter isActionEQ validActs
+        validActs :: [Action]
+        validActs = V.map snd (WW.validActions s) V.! 0
         act1 :: [Action]
         act1 = take 1 actions
         actions :: [Action]
