@@ -65,16 +65,26 @@ initialManipulators :: Set Point
 initialManipulators = Set.fromList [(1,0), (1,1), (1,-1)]
 
 
-step :: (State, [[Action]]) -> (State, [[Action]])
-step (s, ass) =
-  case splitAt n ass of
-    (ass1, ass2) ->
-      let (as, ass1') = unzip (map f ass1)
-       in ( foldl' (\s1 (i, a) -> stepWrapper i a s1) s (zip [0..n-1] as)
-          , ass1' ++ ass2
-          )
+step :: [Action] -> State -> State
+step as s
+  | length as /= n = error "incorrect number of actions"
+  | otherwise = foldl' (\s1 (i, a) -> stepWrapper i a s1) s (zip [0..] as)
   where
     n = V.length (stWrappers s)
+
+
+simulateSolution :: [[Action]] -> State -> State
+simulateSolution = loop
+  where
+    loop :: [[Action]] -> State -> State
+    loop ass s =
+      case splitAt n ass of
+        (ass1, ass2) ->
+          let (as, ass1') = unzip (map f ass1)
+           in loop (ass1' ++ ass2) (step as s)
+      where
+        n = V.length (stWrappers s)
+
     f (a:as) = (a, as)
     f [] = (ActionZ, [])
 
