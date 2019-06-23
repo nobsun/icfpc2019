@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: df074585f9812aef288713054d213192a406ba82ec62db79ea3c5c889a97b5a6
+-- hash: e62e31644d96a19b2065059bc83b021347cf43f539b61b01f7abf0008673fdca
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -33,6 +33,7 @@ library
       Region
       ShortestPath
       Solver
+      SolverSimple
       SubmitQueue
       Task
       WorkerWrapper
@@ -73,6 +74,20 @@ executable icfpc2019-exe
   ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
+    , icfpc2019
+  default-language: Haskell2010
+
+executable solver-simple
+  main-is: solver-simple.hs
+  other-modules:
+      Main
+      Paths_icfpc2019
+  hs-source-dirs:
+      app
+  ghc-options: -Wall
+  build-depends:
+      base
+    , bytestring
     , icfpc2019
   default-language: Haskell2010
 
