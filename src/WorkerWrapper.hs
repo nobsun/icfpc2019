@@ -260,11 +260,17 @@ clone i s
 -------------------------------------------------------------------------------------------
 -- high level API
 -------------------------------------------------------------------------------------------
-possibleActions :: State -> Vector (WrapperState, [Action])
-possibleActions s = V.map possible (stWrappers s)
+simulate1Step :: State -> Action -> State
+simulate1Step s act = undefined
   where
-    possible :: WrapperState -> (WrapperState, [Action])
-    possible ws = (ws, candidates)
+    candidates = V.map snd (validActions s)
+    
+
+validActions :: State -> Vector (WrapperState, [Action])
+validActions s = V.map valid (stWrappers s)
+  where
+    valid :: WrapperState -> (WrapperState, [Action])
+    valid ws = (ws, candidates)
       where
         -- 候補手
         candidates = if done then [] else  moves ++ turns ++ actF ++ actL ++ actC ++ actR ++ actT ++ actB ++ actZ
@@ -280,17 +286,19 @@ possibleActions s = V.map possible (stWrappers s)
         -- 保有ブースター
         bs = stBoostersCollected s
         -- スピードアップ
-        actF = if (Map.findWithDefault 0 BoosterF bs) > 0 then return ActionF else fail "Not Found FastWheel"
+        actF = if (Map.findWithDefault 0 BoosterF bs) > 0 then return ActionF else fail "Not FastWheel"
         -- ドリル使用
-        actL = if (Map.findWithDefault 0 BoosterL bs) > 0 then return ActionL else fail "Not Found Drill"
+        actL = if (Map.findWithDefault 0 BoosterL bs) > 0 then return ActionL else fail "Not Drill"
         -- クローン
-        actC = if (Map.findWithDefault 0 BoosterC bs) > 0 then return ActionC else fail "Not Found Clone"
+        actC = if (Map.findWithDefault 0 BoosterC bs) > 0 then return ActionC else fail "Not Clone"
         -- リセット
-        actR = if (Map.findWithDefault 0 BoosterR bs) > 0 then return ActionR else fail "Not Found Reset"
+        actR = if (Map.findWithDefault 0 BoosterR bs) > 0 then return ActionR else fail "Not Reset"
         -- シフト
         actT = map ActionT (Set.toList (stTeleportBeacons s))
         -- マニピュレータ追加
-        actB = map ActionB (Set.toList $ arounds Set.\\ wsbody)
+        actB = if (Map.findWithDefault 0 BoosterB bs) > 0 then ms else fail "No Manipulator"
+          where
+            ms = map ActionB (Set.toList $ arounds Set.\\ wsbody)
         -- ウェイト
         actZ = if V.length (stWrappers s) > 0 then return ActionZ else fail "Nop NO NEED"
         wsbody = Set.insert pos (wsManipulators ws)
