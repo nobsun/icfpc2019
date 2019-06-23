@@ -321,7 +321,7 @@ validActions s = V.map valid (stWrappers s)
     valid ws = (ws, candidates)
       where
         -- 候補手(まずは移動と転回のみ)
-        candidates = if done then [] else  moves ++ turns ++ actB -- ++ actF ++ actL ++ actC ++ actR ++ actT ++ actZ
+        candidates = if done then [] else {- moves ++ -} turns ++ actB -- ++ actF ++ actL ++ actC ++ actR ++ actT ++ actZ
         -- フロンティアがなくなった
         done = Set.null $ stUnwrapped s
         -- 現在位置

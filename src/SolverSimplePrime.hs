@@ -48,11 +48,14 @@ solve task = loop Seq.empty (WW.initialState task)
         isActionEQ TurnCCW = True
         isActionEQ _ = False
         act' :: [Action]
-        act' = if null bs then act1 else head bs:act1
+        act' = if null bs && null eqs
+               then act1
+               else if null bs then head eqs:act1
+                    else head bs:act1
           where bs  = filter isActionB validActs
                 eqs = filter isActionEQ validActs
         validActs :: [Action]
-        validActs = V.map snd (WW.validActions s) V.! 0
+        validActs = maybe [] (\(a,_,_) -> [a]) $ WW.decide s 0 -- V.map snd (WW.validActions s) V.! 0
         act1 :: [Action]
         act1 = take 1 actions
         actions :: [Action]
