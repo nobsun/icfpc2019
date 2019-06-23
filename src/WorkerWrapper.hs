@@ -80,6 +80,7 @@ simulateSolution :: [[Action]] -> State -> State
 simulateSolution = loop
   where
     loop :: [[Action]] -> State -> State
+    loop ass s | all null ass = s
     loop ass s =
       case splitAt n ass of
         (ass1, ass2) ->
