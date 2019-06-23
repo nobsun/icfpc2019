@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e62e31644d96a19b2065059bc83b021347cf43f539b61b01f7abf0008673fdca
+-- hash: 3c35b0d6ecb24d796488bc34a5953a5f8c687c0e797f4629390c330d67f44917
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -49,7 +49,6 @@ library
     , bytestring
     , containers
     , directory
-    , dlist
     , filepath
     , hashable
     , hashtables

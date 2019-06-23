@@ -7,13 +7,11 @@ where
 
 import Control.Applicative
 import Control.Monad
-import Control.Monad.Trans.Writer (Writer, execWriter, tell)
-import Data.DList (DList)
-import qualified Data.DList as DList
 import Data.List
 import Data.Attoparsec.ByteString.Lazy
   (Parser, parse, eitherResult)
 import Data.Attoparsec.ByteString.Char8 hiding (parse, eitherResult)
+import qualified Data.ByteString.Builder as BB
 import qualified Data.ByteString.Lazy.Char8 as L8
 
 
@@ -23,11 +21,10 @@ import qualified Data.ByteString.Lazy.Char8 as L8
 -----------------------------------------------------
 -- 3.2 Encoding solutions
 
-type PrintM = Writer (DList L8.ByteString)
-type Printer a = a -> PrintM ()
+type Printer a = a -> BB.Builder
 
 runPrinter :: Printer a -> a -> L8.ByteString
-runPrinter p = mconcat . DList.toList . execWriter . p
+runPrinter p a = BB.toLazyByteString (p a)
 
 data Action
   = MoveUp             -- ^ move up
@@ -63,15 +60,12 @@ encodeAction = enc
     enc Clone = "C"
 
 printAction :: Printer Action
-printAction a = tell . pure $ encodeAction a
+printAction a = BB.lazyByteString $ encodeAction a
 
 type Actions = [Action]
 
 printActions :: Printer Actions
-printActions = mapM_ printAction
-
-printActionDList :: Printer (DList Action)
-printActionDList = mapM_ printAction . DList.toList
+printActions = mconcat . map printAction
 
 ---
 
@@ -98,7 +92,7 @@ actionP = msum
 type Solution = [Actions]
 
 printSolution :: Printer Solution
-printSolution = sequence_ . intersperse (tell (pure "#")) . map printActions
+printSolution = mconcat . intersperse (BB.char8 '#') . map printActions
 
 parseSolution :: L8.ByteString -> Either String Solution
 parseSolution = runParser solutionP
