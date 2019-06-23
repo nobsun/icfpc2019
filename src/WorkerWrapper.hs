@@ -1,6 +1,7 @@
 module WorkerWrapper where
 
 import Data.Array.Unboxed
+import Data.Function (on)
 import Data.List
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -282,10 +283,20 @@ clone i s
 -------------------------------------------------------------------------------------------
 -- high level API
 -------------------------------------------------------------------------------------------
+type Score = Int
+fst3 (x,_,_) = x
+snd3 (_,y,_) = y
+thd3 (_,_,z) = z
+
+decide :: State -> Int -> Action
+decide s i = fst3 $ head $ sortBy (compare `on` thd3) $ simulate1Step s i
+
 -- i番目のwrapperだけで他のwrapperの進行は考えず(動かないものとして)に読む
-simulate1Step :: State -> Int -> [(Action, State)]
-simulate1Step s i = Prelude.map (\(x, xs) -> (x, flip step s xs)) commands
+simulate1Step :: State -> Int -> [(Action, State, Score)]
+simulate1Step s i = Prelude.map (\(x, xs) -> let s' = step xs s in (x, s', eval s')) commands
   where
+    eval :: State -> Score
+    eval = Set.size . stUnwrapped
     -- i番目のwrapperへのコマンドと全wrapperへのアクションのリストとの
     -- タプルのリスト
     commands :: [(Action, [Action])]
