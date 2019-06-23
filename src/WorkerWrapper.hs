@@ -289,8 +289,8 @@ fst3 (x,_,_) = x
 snd3 (_,y,_) = y
 thd3 (_,_,z) = z
 
-decide :: State -> Int -> Maybe Action
-decide s i = if e == 0 then Nothing else Just a
+decide :: State -> Int -> Maybe (Action, State, Score)
+decide s i = if e == 0 then Nothing else Just (a, s', e)
   where
     (a, s', e) = head $ sortBy (compare `on` thd3) $ simulate1Step s i
 
@@ -318,8 +318,8 @@ validActions s = V.map valid (stWrappers s)
     valid :: WrapperState -> (WrapperState, [Action])
     valid ws = (ws, candidates)
       where
-        -- 候補手
-        candidates = if done then [] else  moves ++ turns ++ actF ++ actL ++ actC ++ actR ++ actT ++ actB ++ actZ
+        -- 候補手(まずは移動と転回のみ)
+        candidates = if done then [] else  moves ++ turns ++ actB -- ++ actF ++ actL ++ actC ++ actR ++ actT ++ actZ
         -- フロンティアがなくなった
         done = Set.null $ stUnwrapped s
         -- 現在位置
@@ -331,13 +331,13 @@ validActions s = V.map valid (stWrappers s)
         turns = [ActionE, ActionQ]
         -- 保有ブースター
         bs = stBoostersCollected s
+        actF, actL, actC, actR, actT, actB, actZ :: [Action]
         -- スピードアップ
         actF = if (Map.findWithDefault 0 BoosterF bs) > 0 then return ActionF else fail "Not FastWheel"
         -- ドリル使用
         actL = if (Map.findWithDefault 0 BoosterL bs) > 0 then return ActionL else fail "Not Drill"
         -- クローン
-        actC = []
---        actC = if (Map.findWithDefault 0 BoosterC bs) > 0 then return ActionC else fail "Not Clone"
+        actC = if (Map.findWithDefault 0 BoosterC bs) > 0 then return ActionC else fail "Not Clone"
         -- リセット
         actR = if (Map.findWithDefault 0 BoosterR bs) > 0 then return ActionR else fail "Not Reset"
         -- シフト
