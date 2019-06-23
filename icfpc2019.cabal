@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e62e31644d96a19b2065059bc83b021347cf43f539b61b01f7abf0008673fdca
+-- hash: e770d27a1d8124ea68d8e1838b7424e9935cd1b5df1b26de0fd3401239e41a44
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -28,7 +28,6 @@ source-repository head
 library
   exposed-modules:
       Bitmap
-      Lib
       Problems
       Region
       ShortestPath
@@ -50,7 +49,6 @@ library
     , bytestring
     , containers
     , directory
-    , dlist
     , filepath
     , hashable
     , hashtables
@@ -66,22 +64,9 @@ library
     , vector
   default-language: Haskell2010
 
-executable icfpc2019-exe
-  main-is: Main.hs
+executable solver
+  main-is: solver.hs
   other-modules:
-      Paths_icfpc2019
-  hs-source-dirs:
-      app
-  ghc-options: -Wall
-  build-depends:
-      base >=4.7 && <5
-    , icfpc2019
-  default-language: Haskell2010
-
-executable solver-simple
-  main-is: solver-simple.hs
-  other-modules:
-      Main
       Paths_icfpc2019
   hs-source-dirs:
       app
@@ -90,20 +75,7 @@ executable solver-simple
       base
     , bytestring
     , icfpc2019
-  default-language: Haskell2010
-
-executable solver-simpleprime
-  main-is: solver-simpleprime.hs
-  other-modules:
-      Main
-      Paths_icfpc2019
-  hs-source-dirs:
-      app
-  ghc-options: -Wall
-  build-depends:
-      base
-    , bytestring
-    , icfpc2019
+    , optparse-applicative
   default-language: Haskell2010
 
 executable merge
@@ -124,7 +96,6 @@ executable merge
 executable submit-gateway
   main-is: gateway.hs
   other-modules:
-      Main
       Paths_icfpc2019
   hs-source-dirs:
       app
@@ -137,7 +108,6 @@ executable submit-gateway
 executable view-map
   main-is: viewMap.hs
   other-modules:
-      Main
       Paths_icfpc2019
   hs-source-dirs:
       app
@@ -152,27 +122,6 @@ test-suite icfpc2019-doctest
   type: exitcode-stdio-1.0
   main-is: doctests.hs
   other-modules:
-      LibSpec
-      Paths_icfpc2019
-  hs-source-dirs:
-      test
-  ghc-options: -Wall
-  build-depends:
-      base >=4.7 && <5
-    , bytestring
-    , doctest
-    , hspec
-    , icfpc2019
-    , main-tester
-    , text
-    , unicode-show
-  default-language: Haskell2010
-
-test-suite icfpc2019-test
-  type: exitcode-stdio-1.0
-  main-is: spec.hs
-  other-modules:
-      LibSpec
       Paths_icfpc2019
   hs-source-dirs:
       test
