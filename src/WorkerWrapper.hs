@@ -272,8 +272,9 @@ possibleActions s = V.map (possible s) (stWrappers s)
         turns = [ActionE, ActionQ]
         speedup = maybe [] (\n -> if n>0 then [ActionF] else []) (Map.lookup BoosterF (stBoostersCollected s))
         drill = maybe [] (\n -> if n>0 then [ActionL] else []) (Map.lookup BoosterL (stBoostersCollected s))
-        extendarms = map ActionB (Set.toList arounds)
-        arounds = Set.unions (Set.toList (Set.map around (Set.insert pos (wsManipulators ws))))
+        extendarms = map ActionB (Set.toList $ arounds Set.\\ wsbody)
+        wsbody = Set.insert pos (wsManipulators ws)
+        arounds = Set.unions (Set.toList (Set.map around wsbody))
           where
             around :: Point -> Set Point
-            around (x', y') = Set.fromList [(x,y+1),(x+1,y),(x,y-1),(x-1,y)]
+            around (x', y') = Set.fromList [(x',y'+1),(x'+1,y'),(x',y'-1),(x'-1,y')]
