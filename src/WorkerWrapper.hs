@@ -261,10 +261,10 @@ clone i s
 -- high level API
 -------------------------------------------------------------------------------------------
 possibleActions :: State -> Vector (WrapperState, [Action])
-possibleActions s = V.map (possible s) (stWrappers s)
+possibleActions s = V.map possible (stWrappers s)
   where
-    possible :: State -> WrapperState -> (WrapperState, [Action])
-    possible s ws = (ws, moves ++ turns ++ drill ++ speedup ++ extendarms ++ clone ++ reset ++ shift)
+    possible :: WrapperState -> (WrapperState, [Action])
+    possible ws = (ws, moves ++ turns ++ actF ++ actL ++ actC ++ actR ++ actT ++ actB)
       where
         pos@(x,y) = wsPosition ws
         -- 移動候補
@@ -272,18 +272,20 @@ possibleActions s = V.map (possible s) (stWrappers s)
                    , inRange (bounds (stMap s)) p, stMap s ! p]
         -- 転回候補
         turns = [ActionE, ActionQ]
+        -- 保有ブースター
+        bs = stBoostersCollected s
         -- スピードアップ
-        speedup = maybe [] (\n -> if n>0 then [ActionF] else []) (Map.lookup BoosterF (stBoostersCollected s))
+        actF = if (Map.findWithDefault 0 BoosterF bs) > 0 then return ActionF else fail "Not Found FastWheel"
         -- ドリル使用
-        drill = maybe [] (\n -> if n>0 then [ActionL] else []) (Map.lookup BoosterL (stBoostersCollected s))
+        actL = if (Map.findWithDefault 0 BoosterL bs) > 0 then return ActionL else fail "Not Found Drill"
         -- クローン
-        clone = maybe [] (\n -> if n>0 then [ActionC] else []) (Map.lookup BoosterC (stBoostersCollected s))
+        actC = if (Map.findWithDefault 0 BoosterC bs) > 0 then return ActionC else fail "Not Found Clone"
         -- リセット
-        reset = maybe [] (\n -> if n>0 then [ActionR] else []) (Map.lookup BoosterR (stBoostersCollected s))
+        actR = if (Map.findWithDefault 0 BoosterR bs) > 0 then return ActionR else fail "Not Found Reset"
         -- シフト
-        shift = map ActionT (Set.toList (stTeleportBeacons s))
+        actT = map ActionT (Set.toList (stTeleportBeacons s))
         -- マニピュレータ追加
-        extendarms = map ActionB (Set.toList $ arounds Set.\\ wsbody)
+        actB = map ActionB (Set.toList $ arounds Set.\\ wsbody)
         wsbody = Set.insert pos (wsManipulators ws)
         arounds = Set.unions (Set.toList (Set.map around wsbody))
           where
