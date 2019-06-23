@@ -204,7 +204,7 @@ data Puzzle = Puzzle
 
 
 parsePuzzle :: L8.ByteString -> Either String Puzzle
-parsePuzzle = runParser (puzzleP <* endOfInput)
+parsePuzzle = runParser puzzleP
 
 
 -- | Parsing the task input. Here is an example from examples/puzzle_oga-001.cond:
