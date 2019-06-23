@@ -264,7 +264,7 @@ possibleActions :: State -> Vector (WrapperState, [Action])
 possibleActions s = V.map (possible s) (stWrappers s)
   where
     possible :: State -> WrapperState -> (WrapperState, [Action])
-    possible s ws = (ws, moves ++ turns ++ drill ++ speedup ++ extendarms ++ clone)
+    possible s ws = (ws, moves ++ turns ++ drill ++ speedup ++ extendarms ++ clone ++ reset ++ shift)
       where
         pos@(x,y) = wsPosition ws
         -- 移動候補
@@ -278,6 +278,10 @@ possibleActions s = V.map (possible s) (stWrappers s)
         drill = maybe [] (\n -> if n>0 then [ActionL] else []) (Map.lookup BoosterL (stBoostersCollected s))
         -- クローン
         clone = maybe [] (\n -> if n>0 then [ActionC] else []) (Map.lookup BoosterC (stBoostersCollected s))
+        -- リセット
+        reset = maybe [] (\n -> if n>0 then [ActionR] else []) (Map.lookup BoosterR (stBoostersCollected s))
+        -- シフト
+        shift = map ActionT (Set.toList (stTeleportBeacons s))
         -- マニピュレータ追加
         extendarms = map ActionB (Set.toList $ arounds Set.\\ wsbody)
         wsbody = Set.insert pos (wsManipulators ws)
