@@ -30,19 +30,19 @@ runPrinter :: Printer a -> a -> L8.ByteString
 runPrinter p = mconcat . DList.toList . execWriter . p
 
 data Action
-  = ActionW
-  | ActionS
-  | ActionA
-  | ActionD
-  | ActionZ
-  | ActionE
-  | ActionQ
-  | ActionB (Int,Int)
-  | ActionF
-  | ActionL
-  | ActionR
-  | ActionT (Int, Int)
-  | ActionC
+  = ActionW -- move up
+  | ActionS -- move down
+  | ActionA -- move left
+  | ActionD -- move right
+  | ActionZ -- do nothing
+  | ActionE -- turn 90 deg CW
+  | ActionQ -- turn 90 deg CCW
+  | ActionB (Int,Int) -- attach manipulator
+  | ActionF -- attach fast wheel
+  | ActionL -- start using drill
+  | ActionR -- reset beacon
+  | ActionT (Int, Int) -- shift location
+  | ActionC -- clone
   deriving (Eq, Ord, Show)
 
 encodeAction :: Action -> L8.ByteString
