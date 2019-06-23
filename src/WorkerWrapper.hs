@@ -254,10 +254,9 @@ possibleActions :: State -> Vector (WrapperState, [Action])
 possibleActions s = V.map (possible s) (stWrappers s)
   where
     possible :: State -> WrapperState -> (WrapperState, [Action])
-    possible s ws = (ws, moves)
+    possible s ws = (ws, moves ++ turns)
       where
-        turns = []
-        -- 
         (x,y) = wsPosition ws
         moves = [a | (p, a) <- [((x,y+1), ActionW),((x+1,y), ActionD),((x,y-1), ActionS),((x-1,y), ActionA)]
                    , inRange (bounds (stMap s)) p, stMap s ! p]
+        turns = [ActionE, ActionQ]
