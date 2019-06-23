@@ -282,11 +282,21 @@ clone i s
 -------------------------------------------------------------------------------------------
 -- high level API
 -------------------------------------------------------------------------------------------
-simulate1Step :: State -> Action -> State
-simulate1Step s act = undefined
+-- i番目のwrapperだけで他のwrapperの進行は考えず(動かないものとして)に読む
+simulate1Step :: State -> Int -> [(Action, State)]
+simulate1Step s i = Prelude.map (\(x, xs) -> (x, flip step s xs)) commands
   where
-    candidates = V.map snd (validActions s)
-    
+    -- i番目のwrapperへのコマンドと全wrapperへのアクションのリストとの
+    -- タプルのリスト
+    commands :: [(Action, [Action])]
+    commands = Prelude.map (\a -> gen a) ithCand
+      where
+        gen :: Action -> (Action, [Action])
+        gen a = (a, V.toList $ V.imap (\j _ -> if i == j then a else ActionZ) candidates)
+    candidates :: Vector [Action]
+    candidates = V.map snd $ validActions s
+    ithCand :: [Action]
+    ithCand = candidates V.! i
 
 validActions :: State -> Vector (WrapperState, [Action])
 validActions s = V.map valid (stWrappers s)
