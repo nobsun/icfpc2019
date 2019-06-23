@@ -264,8 +264,13 @@ possibleActions :: State -> Vector (WrapperState, [Action])
 possibleActions s = V.map possible (stWrappers s)
   where
     possible :: WrapperState -> (WrapperState, [Action])
-    possible ws = (ws, moves ++ turns ++ actF ++ actL ++ actC ++ actR ++ actT ++ actB ++ actZ)
+    possible ws = (ws, candidates)
       where
+        -- 候補手
+        candidates = if done then [] else  moves ++ turns ++ actF ++ actL ++ actC ++ actR ++ actT ++ actB ++ actZ
+        -- フロンティアがなくなった
+        done = Set.null $ stUnwrapped s
+        -- 現在位置
         pos@(x,y) = wsPosition ws
         -- 移動候補
         moves = [a | (p, a) <- [((x,y+1), ActionW),((x+1,y), ActionD),((x,y-1), ActionS),((x-1,y), ActionA)]
