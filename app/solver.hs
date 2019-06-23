@@ -1,5 +1,8 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
+import qualified Data.ByteString.Builder as BB
+import qualified Data.ByteString.Char8 as SB
 import qualified Data.ByteString.Lazy.Char8 as LB
 import Options.Applicative
 import System.Exit
@@ -47,4 +50,5 @@ main = do
                "simple" -> return $ SolverSimple.solve task
                "simple-prime" -> return $ SolverSimplePrime.solve task
                name -> hPutStrLn stderr ("unknown solver: " ++ name) >> exitFailure
-      LB.putStrLn $ runPrinter printSolution sol
+      BB.hPutBuilder stdout (printSolution sol)
+      SB.putStrLn ""
