@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e770d27a1d8124ea68d8e1838b7424e9935cd1b5df1b26de0fd3401239e41a44
+-- hash: 1ce9b96f213fab7e545148ae3092034f148175bd6d795f1d095979e89ce847a5
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -64,6 +64,20 @@ library
     , vector
   default-language: Haskell2010
 
+executable merge
+  main-is: merge.hs
+  other-modules:
+      Paths_icfpc2019
+  hs-source-dirs:
+      app
+  ghc-options: -Wall
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , directory
+    , icfpc2019
+  default-language: Haskell2010
+
 executable solver
   main-is: solver.hs
   other-modules:
@@ -72,25 +86,10 @@ executable solver
       app
   ghc-options: -Wall
   build-depends:
-      base
+      base >=4.7 && <5
     , bytestring
     , icfpc2019
     , optparse-applicative
-  default-language: Haskell2010
-
-executable merge
-  main-is: merge.hs
-  other-modules:
-      Main
-      Paths_icfpc2019
-  hs-source-dirs:
-      app
-  ghc-options: -Wall
-  build-depends:
-      base
-    , bytestring
-    , directory
-    , icfpc2019
   default-language: Haskell2010
 
 executable submit-gateway

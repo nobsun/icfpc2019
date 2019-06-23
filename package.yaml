@@ -78,11 +78,21 @@ executables:
     # - -rtsopts
     # - -with-rtsopts=-N
     dependencies:
-    - base
     - icfpc2019
     - bytestring
     - optparse-applicative
 
+  merge:
+    main:                merge.hs
+    source-dirs:         app
+    # ghc-options:
+    # - -threaded
+    # - -rtsopts
+    # - -with-rtsopts=-N
+    dependencies:
+    - icfpc2019
+    - bytestring
+    - directory
 
 tests:
   icfpc2019-doctest:

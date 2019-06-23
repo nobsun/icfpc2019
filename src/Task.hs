@@ -189,8 +189,8 @@ data Puzzle = Puzzle
   { pzBlockNumber :: Int
   , pzEpochNumber :: Int
   , pzTotalSize   :: Int
-  , pzVerticsMin    :: Int
-  , pzVerticsMax    :: Int
+  , pzVerticesMin :: Int
+  , pzVerticesMax :: Int
   , pzMNumber     :: Int
   , pzFNumber     :: Int
   , pzDNumber     :: Int
@@ -204,12 +204,12 @@ data Puzzle = Puzzle
 
 
 parsePuzzle :: L8.ByteString -> Either String Puzzle
-parsePuzzle = runParser (puzzleP <* endOfInput)
+parsePuzzle = runParser puzzleP
 
 
 -- | Parsing the task input. Here is an example from examples/puzzle_oga-001.cond:
--- >>> parsePuzzle (L8.pack "1,1,10,4,20,0,0,0,0,0,0#(0,0)#(5,5)"
--- Right (Puzzle {pzBlockNumber = 1, pzEpochNumber = 1, pzTotalSize = 10, pzVerticsMin = 4, pzVerticsMax = 20, pzMNumber = 0, pzFNumber = 0, pzDNumber = 0, pzRNumber = 0, pzCNumber = 0, pzXNumber = 0, pzIncludes = [(0,0)], pzExcludes = [(5,5)]})
+-- >>> parsePuzzle (L8.pack "1,1,10,4,20,0,0,0,0,0,0#(0,0)#(5,5)")
+-- Right (Puzzle {pzBlockNumber = 1, pzEpochNumber = 1, pzTotalSize = 10, pzVerticesMin = 4, pzVerticesMax = 20, pzMNumber = 0, pzFNumber = 0, pzDNumber = 0, pzRNumber = 0, pzCNumber = 0, pzXNumber = 0, pzIncludes = [(0,0)], pzExcludes = [(5,5)]})
 --
 
 puzzleP :: Parser Puzzle
