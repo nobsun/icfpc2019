@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3c35b0d6ecb24d796488bc34a5953a5f8c687c0e797f4629390c330d67f44917
+-- hash: e8e0aa1469a7a94a6a7c6fee029bdffda20979f6cac89d53ab19f1329667b73c
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -28,7 +28,6 @@ source-repository head
 library
   exposed-modules:
       Bitmap
-      Lib
       Problems
       Region
       ShortestPath
@@ -65,36 +64,9 @@ library
     , vector
   default-language: Haskell2010
 
-executable icfpc2019-exe
-  main-is: Main.hs
-  other-modules:
-      Paths_icfpc2019
-  hs-source-dirs:
-      app
-  ghc-options: -Wall
-  build-depends:
-      base >=4.7 && <5
-    , icfpc2019
-  default-language: Haskell2010
-
 executable solver-simple
   main-is: solver-simple.hs
   other-modules:
-      Main
-      Paths_icfpc2019
-  hs-source-dirs:
-      app
-  ghc-options: -Wall
-  build-depends:
-      base
-    , bytestring
-    , icfpc2019
-  default-language: Haskell2010
-
-executable solver-simpleprime
-  main-is: solver-simpleprime.hs
-  other-modules:
-      Main
       Paths_icfpc2019
   hs-source-dirs:
       app
@@ -108,7 +80,6 @@ executable solver-simpleprime
 executable submit-gateway
   main-is: gateway.hs
   other-modules:
-      Main
       Paths_icfpc2019
   hs-source-dirs:
       app
@@ -121,7 +92,6 @@ executable submit-gateway
 executable view-map
   main-is: viewMap.hs
   other-modules:
-      Main
       Paths_icfpc2019
   hs-source-dirs:
       app
