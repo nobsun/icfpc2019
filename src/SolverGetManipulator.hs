@@ -52,22 +52,17 @@ solve task = loop Seq.empty (WW.initialState task)
 
         actions = [ act | (_,_,_,act) <- head ordered ]
 
-        manipulatorE :: Edge -> Bool
-        manipulatorE (_, p1, _, _)  =  BoosterB `elem` Map.findWithDefault [] p1 boosterMap
-
-        manipulatorAP :: ActionPath -> Bool
-        manipulatorAP es  =  map manipulatorE (take 1 es) == [True]
-
         ordered :: [ActionPath]
-        ordered = ms ++ nms
-          where (ms, nms) = partition manipulatorAP minCosts
+        ordered = map snd ms ++ map snd nms
+          where (ms, nms) = partition fst minCosts
 
-        minCosts :: [ActionPath]
+        minCosts :: [(Bool, ActionPath)]
         minCosts =
           map snd . head $ groupBy ((==) `on` fst)
-          [ (cost, es)
+          [ (cost, (manip, es))
           | (p1, cost, path') <- SP.dijkstraIncremental SP.path g [p0]
           , p1 /= p0
-          , p1 `Set.member` WW.stUnwrapped s
+          , let manip = BoosterB `elem` Map.findWithDefault [] p1 boosterMap
+          , manip || p1 `Set.member` WW.stUnwrapped s
           , let es = SP.pathEdges path'
           ]
