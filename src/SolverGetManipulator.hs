@@ -1,6 +1,7 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module SolverGetManipulator where
+module SolverGetManipulator
+  (solve) where
 
 import Data.Function (on)
 import Data.List (groupBy, partition)
@@ -19,8 +20,9 @@ import qualified WorkerWrapper as WW
 -- import Debug.Trace (traceShow)
 
 type Graph = SP.Graph' Point Int Action
-type Edge  = SP.Edge Point Int Action
-type ActionPath = [Edge]
+type Path  = SP.Path Point Int Action
+-- type Edge  = SP.Edge Point Int Action
+-- type ActionPath = [Edge]
 
 solve :: Task -> Solution
 solve task = loop Seq.empty s0 bm0 (generateGraph bm0)
@@ -46,22 +48,21 @@ solve task = loop Seq.empty s0 bm0 (generateGraph bm0)
         g :: Graph
         g = if bm  == bm' then g' else generateGraph bm
 
-        actions = [ act | (_,_,_,act) <- head ordered ]
+        actions = [ act | (_,_,_,act) <- SP.pathEdges $ head ordered ]
 
-        ordered :: [ActionPath]
+        ordered :: [Path]
         ordered = map snd ms ++ map snd nms
           where (ms, nms) = partition fst minCosts
                 -- traceNN xs
                 --   | null xs    =  xs
                 --   | otherwise  =  join traceShow xs
 
-        minCosts :: [(Bool, ActionPath)]
+        minCosts :: [(Bool, Path)]
         minCosts =
           map snd . head $ groupBy ((==) `on` fst)
-          [ (cost, (manip, es))
+          [ (cost, (manip, path'))
           | (p1, cost, path') <- SP.dijkstraIncremental' SP.path g [p0]
           , p1 /= p0
           , let manip = BoosterB `elem` Map.findWithDefault [] p1 boosterMap
           , manip || p1 `Set.member` WW.stUnwrapped s
-          , let es = SP.pathEdges path'
           ]

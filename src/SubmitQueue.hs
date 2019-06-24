@@ -17,8 +17,8 @@ import System.IO (stdout, BufferMode (LineBuffering), hSetBuffering, hGetContent
 import System.FilePath ((</>), (<.>))
 import System.Directory (renameFile)
 import System.Process (rawSystem, runInteractiveProcess)
-import System.Exit (ExitCode (..))
 
+import ProcessIO (ioExitCode)
 
 submitGateway :: IO ()
 submitGateway = do
@@ -115,11 +115,3 @@ readInotifyEvents = do
                             Nothing Nothing
   hSetBuffering out LineBuffering
   hGetContents out
-
-runExitCode :: a -> (Int -> a) -> ExitCode -> a
-runExitCode s e ec = case ec of
-  ExitSuccess   -> s
-  ExitFailure c -> e c
-
-ioExitCode :: ExitCode -> IO ()
-ioExitCode = runExitCode (return ()) (fail . ("exited failure with code: " ++) . show)
