@@ -5,14 +5,18 @@ module PuzzleSolver where
 
 import Control.Monad
 import Data.Array.IArray
+import Data.List
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+import Data.Ord
+import Data.Set (Set)
+import qualified Data.Set as Set
 
 import Task (Point, Puzzle (..), Task (..))
 import qualified ToySolver.SAT as SAT
 
 solve :: Puzzle -> IO ()
-solve puzzle@Puzzle{ .. } = do
+solve Puzzle{ .. } = do
   solver <- SAT.newSolver
 
   -- 4. M should be contained within the non-negative square with x/y-coordinates less or equal tSize
@@ -149,11 +153,35 @@ solve puzzle@Puzzle{ .. } = do
   -- • cNum cloning boosters,
   -- • xNum spawn points.
 
-  b <- SAT.solve solver  
-  when b $ do
-    m <- SAT.getModel solver
-    forM_ [pzTotalSize-1, pzTotalSize-2 .. 0] $ \y -> do
-      putStrLn [if SAT.evalLit m (vCells ! (x,y)) then '.' else '#' | x <- [0 .. pzTotalSize-1]]
+  let collectUsedEdges m = [e | (e,v) <- Map.toList vEdges, SAT.evalLit m v]
+
+  let loop :: IO (Maybe Cycle)
+      loop = do
+        b <- SAT.solve solver
+        if not b then
+          return Nothing
+        else do
+          m <- SAT.getModel solver
+          forM_ [pzTotalSize-1, pzTotalSize-2 .. 0] $ \y -> do
+            putStrLn [if SAT.evalLit m (vCells ! (x,y)) then '.' else '#' | x <- [0 .. pzTotalSize-1]]
+          putStrLn "cycles:"
+          let cycles = edgesToCycles (collectUsedEdges m)
+              n = length cycles
+          forM_ cycles $ \cyc -> do
+            print $ cycleToPolygon cyc
+          if n == 1 then do
+            return $ Just (head cycles)
+          else do
+            -- 最長のサイクル以外を排除しているが、これはcompleteな方法ではないかも
+            let cycles' = sortBy (flip (comparing fst)) [(length cyc, cyc) | cyc <- cycles]
+            forM_ (tail cycles') $ \(_,cyc) -> do
+              SAT.addClause solver [- (vEdges Map.! e) | e <- cyc]
+            loop
+
+  m <- loop
+  case m of
+    Nothing -> return ()
+    Just _cyc -> return ()
 
   return ()
 
@@ -169,8 +197,70 @@ solve puzzle@Puzzle{ .. } = do
 (0,0) ---- (1,0) ---- (2,0)
 -}
 
+-- -------------------------------------------------------------------
+
+type Edge = (Point,Point)
+
+-- どちら側が内側とか考慮していないので注意
+type Cycle = [Edge]
+
+edgesToCycles :: [Edge] -> [Cycle]
+edgesToCycles es0 = f (Set.fromList es0)
+  where
+    table :: Map Point [(Point, Edge)]
+    table = Map.fromListWith (++) $ concat $ [[(p1, [(p2,e)]), (p2, [(p1,e)])] | e@(p1,p2) <- es0]
+
+    f :: Set Edge -> [Cycle]
+    f es =
+       case Set.maxView es of
+         Nothing -> []
+         Just (e@(p1,p2), es') ->
+           let cyc = g p1 p2 e [e]
+            in cyc : f (es `Set.difference` Set.fromList cyc)
+
+    g :: Point -> Point -> Edge -> [Edge] -> [Edge]
+    g p0 currV currE es
+      | currV == p0 = reverse es -- 後でサイクルを触るときに最初のがエッジの向きにたどれば良いように
+      | otherwise =
+          let (p1,e1) = head [(p1,e1) | (p1,e1) <- table Map.! currV, currE /= e1]
+           in g p0 p1 e1 (e1 : es)
+
+cycleToPolygon :: Cycle -> [Point]
+cycleToPolygon = removeRedundantVertexes . cycleToPolygon'
+
+-- 冗長な頂点が含まれる可能性がある
+cycleToPolygon' :: Cycle -> [Point]
+cycleToPolygon' [] = []
+cycleToPolygon' es@((p0,_) : _) = g p0 es
+  where
+    g _ [] = []
+    g p ((p1,p2) : es) = p : (if p == p1 then g p2 es else g p1 es)
+
+-- removeRedundantVertexes [(1,0),(2,0),(2,1),(2,2),(1,2),(0,2),(0,1),(0,0)]
+-- => [(2,0),(2,2),(0,2),(0,0)]
+removeRedundantVertexes :: [Point] -> [Point]
+removeRedundantVertexes [] = []
+removeRedundantVertexes ps@[_] = ps
+removeRedundantVertexes (p1 : p2 : ps) = g (p1 : f p1 p2 ps)
+  where
+    f _p1 p2 [] = [p2]
+    f p1@(x1,y1) p2@(x2,y2) (p3@(x3,y3) : ps)
+      | x1==x2 && x1==x3 = f p1 p3 ps
+      | y1==y2 && y1==y3 = f p1 p3 ps
+      | otherwise = p2 : f p2 p3 ps
+
+    g (p2@(x2,y2) : p3@(x3,y3) : ps)
+      | x1==x2 && x1==x3 = p3 : ps
+      | y1==y2 && y1==y3 = p3 : ps
+      | otherwise = p2 : p3 : ps
+      where
+        (x1,y1) = last ps
+    g _ = error "should not happen"
+
+-- -------------------------------------------------------------------
 
 -- chain-puzzle-examples/puzzle.cond
+puzzle :: Puzzle
 puzzle =
   Puzzle
   { pzBlockNumber = 1
@@ -188,6 +278,8 @@ puzzle =
   , pzExcludes = [(5,5)]
   }
 
+test :: IO ()
 test = do
   print puzzle
   solve puzzle
+  return ()
