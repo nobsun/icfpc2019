@@ -42,10 +42,7 @@ solve task = loop Seq.empty s0 bm0 (generateGraph bm0)
         isActionEQ TurnCCW = True
         isActionEQ _ = False
         act' :: [Action]
-        act' = if null bs && null eqs
-               then act1
-               else if null bs then head eqs:act1
-                    else head bs:act1
+        act' = if null bs then act1 else head bs:act1
           where bs  = filter isActionB validActs
                 eqs = filter isActionEQ validActs
         validActs :: [Action]
