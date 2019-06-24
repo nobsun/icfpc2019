@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0b3bcf35dd373b376edbd0fe252bc6033170ef805e907107ea582e41d6772d7f
+-- hash: c4afa627e76d89cbf799c0ac62838b2d01c83c90e410cdd59eb0a0a77228375b
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -64,6 +64,20 @@ library
     , unicode-show
     , unordered-containers
     , vector
+  default-language: Haskell2010
+
+executable puzzle-solver
+  main-is: puzzle-solver.hs
+  other-modules:
+      Paths_icfpc2019
+  hs-source-dirs:
+      app
+  ghc-options: -Wall
+  build-depends:
+      base
+    , bytestring
+    , icfpc2019
+    , optparse-applicative
   default-language: Haskell2010
 
 executable solver

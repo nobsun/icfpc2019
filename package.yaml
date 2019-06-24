@@ -84,6 +84,19 @@ executables:
     - bytestring
     - optparse-applicative
 
+  puzzle-solver:
+    main:                puzzle-solver.hs
+    source-dirs:         app
+    # ghc-options:
+    # - -threaded
+    # - -rtsopts
+    # - -with-rtsopts=-N
+    dependencies:
+    - base
+    - icfpc2019
+    - bytestring
+    - optparse-applicative
+
 
 tests:
   icfpc2019-doctest:
