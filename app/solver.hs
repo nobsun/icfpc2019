@@ -31,7 +31,7 @@ optionsParser = Options
     algorithmOption = strOption
       $  long "alg"
       <> metavar "ALGORITHM"
-      <> help "algorithm: simple (default), simple-prime, get-manipulator"
+      <> help "algorithm: simple (default), simple-prime, get-manip"
       <> value "simple"
 
 parserInfo :: ParserInfo Options
@@ -50,7 +50,7 @@ main = do
       sol <- case optAlgorithm opt of
                "simple" -> return $ SolverSimple.solve task
                "simple-prime" -> return $ SolverSimplePrime.solve task
-               "get-manipulator" -> return $ SolverGetManipulator.solve task
+               "get-manip" -> return $ SolverGetManipulator.solve task
                name -> hPutStrLn stderr ("unknown solver: " ++ name) >> exitFailure
       BB.hPutBuilder stdout (printSolution sol)
       SB.putStrLn ""
