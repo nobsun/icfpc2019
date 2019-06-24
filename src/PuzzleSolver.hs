@@ -9,11 +9,14 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 
 import Task (Point, Puzzle (..), Task (..))
-import ToySolver.SAT as SAT
+import qualified ToySolver.SAT as SAT
 
 solve :: Puzzle -> IO ()
 solve puzzle@Puzzle{ .. } = do
   solver <- SAT.newSolver
+
+  -- 4. M should be contained within the non-negative square with x/y-coordinates less or equal tSize
+  -- (the task is not too large).
 
   -- 各セルが、内部(True)か外部(False)かを表す変数
   let cells = [(x,y) | x <- [0..pzTotalSize-1], y <- [0..pzTotalSize-1]]
@@ -22,8 +25,10 @@ solve puzzle@Puzzle{ .. } = do
       v <- SAT.newVar solver
       return (p,v)
 
+  -- 9. M should contain all squares with coordinates from iSqs.
   forM_ pzIncludes $ \p -> do
     SAT.addClause solver [vCells ! p]
+  -- 10. M must contain no squares with coordinates from oSqs.
   forM_ pzExcludes $ \p -> do
     SAT.addClause solver [- (vCells ! p)]
 
@@ -62,6 +67,19 @@ solve puzzle@Puzzle{ .. } = do
           cell2 = vCells ! (x, y+1)
           edge  = vEdges Map.! ((x,y+1),(x+1,y+1))
       f cell1 cell2 edge
+
+  -- 外部と隣接する場合、境界なら内部、境界でないなら外部
+  let g cell edge = do
+        SAT.addClause solver [-edge, cell] --  edge -> cell
+        SAT.addClause solver [edge, -cell] -- ¬edge -> ¬cell
+  -- 横に隣接する場合
+  forM_ [0 .. pzTotalSize - 1] $ \y -> do
+    g (vCells ! (0, y)) (vEdges Map.! ((0,y),(0,y+1)))
+    g (vCells ! (pzTotalSize-1, y)) (vEdges Map.! ((pzTotalSize,y),(pzTotalSize,y+1)))
+  -- 縦に隣接する場合
+  forM_ [0 .. pzTotalSize - 1] $ \x -> do
+    g (vCells ! (x, 0)) (vEdges Map.! ((x,0),(x+1,0)))
+    g (vCells ! (x, pzTotalSize-1)) (vEdges Map.! ((x,pzTotalSize),(x+1,pzTotalSize)))
 
   forM_ points $ \p@(x,y) -> do
     -- 各頂点の次数は 0 または　2
@@ -107,8 +125,31 @@ solve puzzle@Puzzle{ .. } = do
       SAT.addClause solver [vCorners ! p, - vPass,   v, vEdges Map.! ((x-1,y), (x,y))]
       SAT.addClause solver [vCorners ! p, - vPass,   v, vEdges Map.! ((x,y), (x+1,y))]
 
+  -- 5. At least one of the maximal x/y-dimensions of M should be larger or equal than
+  -- tSize − ⌊0.1 × tSize⌋ (the task is not too small).
+  let tmp = pzTotalSize - floor (0.1 * toRational pzTotalSize)
+  SAT.addClause solver [v | ((x,y),v) <- assocs vCells, tmp <= x+1 || tmp <= y+1]
+
+  -- 6. The area of M must be at least ⌈0.2 × tSize**2⌉ (the task is not too sparse).
+  SAT.addAtLeast solver (elems vCells) (ceiling ((toRational pzTotalSize ^ (2 ::Int)) * 0.5))
+
+  -- 7. The polygon M should have no less than vMin and no more than vMax vertices
+  -- (the task is not too boring and not too hairy).
+  SAT.addAtLeast solver (elems vCorners) pzVerticesMin
+  SAT.addAtMost solver (elems vCorners) pzVerticesMax
+
+  -- 2. The puzzle-solving task may have no obstacles (unlike the tasks from the main contest).
+  -- 3. The initial position of the worker-wrapper should be within the map M.
+
+  -- 8. The task should contain precisely the numbers of boosters specified by the puzzle:
+  -- • mNum manipulator extensions
+  -- • fNum fast wheels,
+  -- • dNum drills,
+  -- • rNum teleports,
+  -- • cNum cloning boosters,
+  -- • xNum spawn points.
+
   b <- SAT.solve solver  
-  print b
   when b $ do
     m <- SAT.getModel solver
     forM_ [pzTotalSize-1, pzTotalSize-2 .. 0] $ \y -> do
@@ -129,8 +170,8 @@ solve puzzle@Puzzle{ .. } = do
 -}
 
 
-
-test =
+-- chain-puzzle-examples/puzzle.cond
+puzzle =
   Puzzle
   { pzBlockNumber = 1
   , pzEpochNumber = 1
@@ -146,3 +187,7 @@ test =
   , pzIncludes = [(0,0)]
   , pzExcludes = [(5,5)]
   }
+
+test = do
+  print puzzle
+  solve puzzle
