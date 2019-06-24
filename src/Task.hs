@@ -178,6 +178,37 @@ boosterCodeP = do
     _   -> fail ("Unknown booster code" ++ [c])
 
 
+printTask :: Task -> BB.Builder
+printTask task =
+  printTaskMap (taskMap task) <> BB.char8 '#' <>
+  printPoint (taskPoint task) <> BB.char8 '#' <>
+  printObstacles (taskObstacles task) <> BB.char8 '#' <>
+  printBoosters (taskBoosters task)
+
+
+printPoint :: Point -> BB.Builder
+printPoint (x,y) = mconcat [BB.char8 '(', BB.intDec x, BB.char8 ',', BB.intDec y, BB.char8 ')']
+
+
+printTaskMap :: TaskMap -> BB.Builder
+printTaskMap = mconcat . intersperse (BB.char8 ',') . map printPoint
+
+
+printObstacles :: [TaskMap] -> BB.Builder
+printObstacles = mconcat . intersperse (BB.char8 ';') . map printTaskMap
+
+
+printBoosters :: [(BoosterCode, Point)] -> BB.Builder
+printBoosters = mconcat . map printBoosterLocation
+  where
+    printBoosterLocation (c,p) = printBoosterCode c <> printPoint p
+    printBoosterCode BoosterB = BB.char8 'B'
+    printBoosterCode BoosterF = BB.char8 'F'
+    printBoosterCode BoosterL = BB.char8 'L'
+    printBoosterCode BoosterX = BB.char8 'X'
+    printBoosterCode BoosterR = BB.char8 'R'
+    printBoosterCode BoosterC = BB.char8 'C'
+
 -----------------------------------------------------
 -- 1.1 Block Puzzle
 --
