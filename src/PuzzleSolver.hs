@@ -5,19 +5,26 @@ module PuzzleSolver where
 
 import Control.Monad
 import Data.Array.IArray
+import Data.Array.Unboxed
+import qualified Data.ByteString.Builder as BB
 import Data.List
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Ord
 import Data.Set (Set)
 import qualified Data.Set as Set
+import System.IO
 
-import Task (Point, Puzzle (..), Task (..))
+import qualified Region
+import Task (Point, Puzzle (..), Task (..), BoosterCode (..), printTask)
 import qualified ToySolver.SAT as SAT
 
-solve :: Puzzle -> IO ()
+-- -------------------------------------------------------------------
+
+solve :: Puzzle -> IO (Maybe Task)
 solve Puzzle{ .. } = do
   solver <- SAT.newSolver
+  SAT.setLogger solver (hPutStrLn stderr)
 
   -- 4. M should be contained within the non-negative square with x/y-coordinates less or equal tSize
   -- (the task is not too large).
@@ -134,17 +141,8 @@ solve Puzzle{ .. } = do
   let tmp = pzTotalSize - floor (0.1 * toRational pzTotalSize)
   SAT.addClause solver [v | ((x,y),v) <- assocs vCells, tmp <= x+1 || tmp <= y+1]
 
-  -- 6. The area of M must be at least ⌈0.2 × tSize**2⌉ (the task is not too sparse).
-  SAT.addAtLeast solver (elems vCells) (ceiling ((toRational pzTotalSize ^ (2 ::Int)) * 0.5))
-
-  -- 7. The polygon M should have no less than vMin and no more than vMax vertices
-  -- (the task is not too boring and not too hairy).
-  SAT.addAtLeast solver (elems vCorners) pzVerticesMin
-  SAT.addAtMost solver (elems vCorners) pzVerticesMax
-
-  -- 2. The puzzle-solving task may have no obstacles (unlike the tasks from the main contest).
   -- 3. The initial position of the worker-wrapper should be within the map M.
-
+  -- 6. The area of M must be at least ⌈0.2 × tSize**2⌉ (the task is not too sparse).
   -- 8. The task should contain precisely the numbers of boosters specified by the puzzle:
   -- • mNum manipulator extensions
   -- • fNum fast wheels,
@@ -152,25 +150,46 @@ solve Puzzle{ .. } = do
   -- • rNum teleports,
   -- • cNum cloning boosters,
   -- • xNum spawn points.
+  SAT.addAtLeast solver (elems vCells) $
+    max (ceiling ((toRational pzTotalSize ^ (2 ::Int)) * 0.5))
+        (1 + pzMNumber + pzFNumber + pzDNumber + pzRNumber + pzCNumber + pzXNumber)
+
+  -- 7. The polygon M should have no less than vMin and no more than vMax vertices
+  -- (the task is not too boring and not too hairy).
+  SAT.addAtLeast solver (elems vCorners) pzVerticesMin
+  SAT.addAtMost solver (elems vCorners) pzVerticesMax
+
+  -- 2. The puzzle-solving task may have no obstacles (unlike the tasks from the main contest).
 
   let collectUsedEdges m = [e | (e,v) <- Map.toList vEdges, SAT.evalLit m v]
 
-  let loop :: IO (Maybe Cycle)
+  let loop :: IO (Maybe ([Point], UArray Point Bool))
       loop = do
         b <- SAT.solve solver
         if not b then
           return Nothing
         else do
           m <- SAT.getModel solver
+          hPutStrLn stderr "map:"
           forM_ [pzTotalSize-1, pzTotalSize-2 .. 0] $ \y -> do
-            putStrLn [if SAT.evalLit m (vCells ! (x,y)) then '.' else '#' | x <- [0 .. pzTotalSize-1]]
-          putStrLn "cycles:"
+            hPutStrLn stderr [if SAT.evalLit m (vCells ! (x,y)) then '.' else '#' | x <- [0 .. pzTotalSize-1]]
+          hPutStrLn stderr "cycles:"
           let cycles = edgesToCycles (collectUsedEdges m)
               n = length cycles
           forM_ cycles $ \cyc -> do
             print $ cycleToPolygon cyc
           if n == 1 then do
-            return $ Just (head cycles)
+            let bm = array (bounds vCells) [(p, SAT.evalLit m v) | (p,v) <- assocs vCells]
+                cyc = cycleToPolygon $ head cycles
+                cellInside = head [p | (p,v) <- assocs bm, v]
+            if Region.isInside (Region.fromList cyc) cellInside then do
+              -- putStrLn "A"
+              return $ Just (cyc, bm)
+            else if Region.isInside (Region.fromList (reverse cyc)) cellInside then do
+              -- putStrLn "B"
+              return $ Just (reverse cyc, bm)
+            else
+              error (show (cyc, cellInside))
           else do
             -- 最長のサイクル以外を排除しているが、これはcompleteな方法ではないかも
             let cycles' = sortBy (flip (comparing fst)) [(length cyc, cyc) | cyc <- cycles]
@@ -180,10 +199,35 @@ solve Puzzle{ .. } = do
 
   m <- loop
   case m of
-    Nothing -> return ()
-    Just _cyc -> return ()
-
-  return ()
+    Nothing -> return Nothing
+    Just (m, bm) -> do
+      hPutStrLn stderr "SUCCESS"
+      let p0 : ps0 = [p | (p,b) <- assocs bm, b]
+      case splitAt pzMNumber ps0 of
+        (psM, ps1) ->
+          case splitAt pzFNumber ps1 of
+            (psF, ps2) ->
+              case splitAt pzDNumber ps2 of
+                (psD, ps3) ->
+                  case splitAt pzRNumber ps3 of
+                    (psR, ps4) ->
+                      case splitAt pzCNumber ps4 of
+                        (psC, ps5) ->
+                          case splitAt pzXNumber ps5 of
+                            (psX, ps6) -> do
+                              return $ Just $
+                                Task
+                                { taskMap = m
+                                , taskPoint = p0
+                                , taskObstacles = []
+                                , taskBoosters =
+                                    [(BoosterB, p) | p <- psM] ++
+                                    [(BoosterF, p) | p <- psF] ++
+                                    [(BoosterL, p) | p <- psD] ++
+                                    [(BoosterR, p) | p <- psR] ++
+                                    [(BoosterC, p) | p <- psC] ++
+                                    [(BoosterX, p) | p <- psX]
+                                }
 
 {-
 (0,2) ---- (1,2) ---- (2,2)
@@ -259,7 +303,7 @@ removeRedundantVertexes (p1 : p2 : ps) = g (p1 : f p1 p2 ps)
 
 -- -------------------------------------------------------------------
 
--- chain-puzzle-examples/puzzle.cond
+-- puzzle_oga-001.cond
 puzzle :: Puzzle
 puzzle =
   Puzzle
@@ -281,5 +325,10 @@ puzzle =
 test :: IO ()
 test = do
   print puzzle
-  solve puzzle
+  m <- solve puzzle
+  case m of
+    Nothing -> return ()
+    Just task -> do
+      BB.hPutBuilder stdout (printTask task)
+      putStrLn ""
   return ()
