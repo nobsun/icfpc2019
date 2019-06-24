@@ -3,6 +3,7 @@
 module SolverSimple where
 
 import Data.Array.IArray
+import Data.Array.Unboxed
 import qualified Data.Foldable as F
 import qualified Data.Map.Strict as Map
 import qualified Data.Sequence as Seq
@@ -25,22 +26,9 @@ solve task = loop Seq.empty (WW.initialState task)
             (WW.simulateSolution [actions] s)
       where
         bm = WW.stMap s
-        bs = bounds bm
         w0 = (WW.stWrappers s) V.! 0
         p0 = WW.wsPosition w0
-
-        g :: SP.Graph' Point Int Action
-        g = Map.fromList $ do
-              p@(x,y) <- range bs
-              return $
-                ( p
-                , [ (p', 1, act)
-                  | (dx,dy,act) <- [(-1,0,MoveLeft), (1,0,MoveRight), (0,-1,MoveDown), (0,1,MoveUp)]
-                  , let p' = (x + dx, y + dy)
-                  , inRange bs p'
-                  , bm ! p'
-                  ]
-                )
+        g = generateGraph bm
 
         actions = head $
           [ [act | (_,_,_,act) <- SP.pathEdges path']
@@ -48,3 +36,18 @@ solve task = loop Seq.empty (WW.initialState task)
           , p1 /= p0
           , p1 `Set.member` WW.stUnwrapped s
           ]
+
+
+generateGraph :: UArray Point Bool -> SP.Graph' Point Int Action
+generateGraph bm = Map.fromList $ do
+  let bs = bounds bm
+  p@(x,y) <- range bs
+  return $
+    ( p
+    , [ (p', 1, act)
+      | (dx,dy,act) <- [(-1,0,MoveLeft), (1,0,MoveRight), (0,-1,MoveDown), (0,1,MoveUp)]
+      , let p' = (x + dx, y + dy)
+      , inRange bs p'
+      , bm ! p'
+      ]
+    )

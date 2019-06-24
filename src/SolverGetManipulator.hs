@@ -4,13 +4,13 @@ module SolverGetManipulator where
 
 import Data.Function (on)
 import Data.List (groupBy, partition)
-import Data.Array.IArray
 import qualified Data.Foldable as F
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import qualified Data.Map as Map
 import qualified Data.Vector as V
 
+import SolverSimple (generateGraph)
 import Task
 import qualified ShortestPath as SP
 import qualified WorkerWrapper as WW
@@ -34,22 +34,11 @@ solve task = loop Seq.empty (WW.initialState task)
       where
         bm = WW.stMap s
         boosterMap = WW.stBoostersOnMap s
-        bs = bounds bm
         w0 = (WW.stWrappers s) V.! 0
         p0 = WW.wsPosition w0
 
         g :: Graph
-        g = Map.fromList $ do
-              p@(x,y) <- range bs
-              return $
-                ( p
-                , [ (p', 1, act)
-                  | (dx,dy,act) <- [(-1,0,MoveLeft), (1,0,MoveRight), (0,-1,MoveDown), (0,1,MoveUp)]
-                  , let p' = (x + dx, y + dy)
-                  , inRange bs p'
-                  , bm ! p'
-                  ]
-                )
+        g = generateGraph bm
 
         actions = [ act | (_,_,_,act) <- head ordered ]
 
