@@ -16,19 +16,26 @@ import qualified WorkerWrapper as WW
 
 
 solve :: Task -> Solution
-solve task = loop Seq.empty (WW.initialState task)
+solve task = loop Seq.empty s0 bm0 (generateGraph bm0)
   where
-    loop !hist s
+    s0 = WW.initialState task
+    bm0 = WW.stMap s0
+
+    loop !hist s bm' g'
       | Set.null (WW.stUnwrapped s) = [F.toList hist]
       | otherwise =
           loop
             (hist <> Seq.fromList actions)
             (WW.simulateSolution [actions] s)
+            bm
+            g
       where
         bm = WW.stMap s
         w0 = (WW.stWrappers s) V.! 0
         p0 = WW.wsPosition w0
-        g = generateGraph bm
+
+        -- ドリルで穴を開けられたとき以外は同じものをそのまま使えば良い
+        g = if bm  == bm' then g' else generateGraph bm
 
         actions = head $
           [ [act | (_,_,_,act) <- SP.pathEdges path']

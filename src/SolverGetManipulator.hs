@@ -23,22 +23,28 @@ type Edge  = SP.Edge Point Int Action
 type ActionPath = [Edge]
 
 solve :: Task -> Solution
-solve task = loop Seq.empty (WW.initialState task)
+solve task = loop Seq.empty s0 bm0 (generateGraph bm0)
   where
-    loop !hist s
+    s0 = WW.initialState task
+    bm0 = WW.stMap s0
+
+    loop !hist s bm' g'
       | Set.null (WW.stUnwrapped s) = [F.toList hist]
       | otherwise =
           loop
             (hist <> Seq.fromList actions)
             (WW.simulateSolution [actions] s)
+            bm
+            g
       where
         bm = WW.stMap s
         boosterMap = WW.stBoostersOnMap s
         w0 = (WW.stWrappers s) V.! 0
         p0 = WW.wsPosition w0
 
+        -- ドリルで穴を開けられたとき以外は同じものをそのまま使えば良い
         g :: Graph
-        g = generateGraph bm
+        g = if bm  == bm' then g' else generateGraph bm
 
         actions = [ act | (_,_,_,act) <- head ordered ]
 
