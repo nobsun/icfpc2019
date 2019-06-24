@@ -58,6 +58,8 @@ module ShortestPath
   , bellmanFord
   , dijkstra
   , dijkstraIncremental
+  , Graph'
+  , dijkstraIncremental'
   , floydWarshall
 
   -- * Utility functions
@@ -76,6 +78,8 @@ import qualified Data.HashMap.Strict as HashMap
 import qualified Data.HashSet as HashSet
 import qualified Data.Heap as Heap -- http://hackage.haskell.org/package/heaps
 import Data.List (foldl')
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import Data.Monoid
 import Data.Ord
 import Data.Sequence (Seq)
@@ -418,6 +422,43 @@ dijkstraIncremental (Fold fV fE fC (fD :: x -> a)) g ss =
                        , not (ch `HashMap.member` visited)
                        ]
               in (v, c, fD a) : loop (Heap.union q' q2) (HashMap.insert v (Pair c a) visited)
+
+
+type Graph' vertex cost label = Map vertex [OutEdge vertex cost label]
+
+-- | Dijkstra's algorithm for finding shortest paths from source vertexes
+-- to all of the other vertices in a weighted graph with non-negative edge
+-- weight.
+--
+-- It compute shortest-paths from given source vertexes, and folds edge
+-- information along shortest paths using a given 'Fold' operation.
+dijkstraIncremental'
+  :: forall vertex cost label a. (Eq vertex, Ord vertex, Real cost)
+  => Fold vertex cost label a
+     -- ^ Operation used to fold shotest paths
+  -> Graph' vertex cost label
+  -> [vertex]
+     -- ^ List of source vertexes
+  -> [(vertex, cost, a)]
+dijkstraIncremental' (Fold fV fE fC (fD :: x -> a)) g ss =
+  loop (Heap.fromList [Heap.Entry 0 (Pair s (fV s)) | s <- ss]) Map.empty
+  where    
+    loop
+      :: Heap.Heap (Heap.Entry cost (Pair vertex x))
+      -> Map vertex (Pair cost x)
+      -> [(vertex, cost, a)]
+    loop q visited =
+      case Heap.viewMin q of
+        Nothing -> []
+        Just (Heap.Entry c (Pair v a), q')
+          | v `Map.member` visited -> loop q' visited
+          | otherwise ->
+              let q2 = Heap.fromList
+                       [ Heap.Entry (c+c') (Pair ch (a `fC` fE (v,ch,c',l)))
+                       | (ch,c',l) <- Map.findWithDefault [] v g
+                       , not (ch `Map.member` visited)
+                       ]
+              in (v, c, fD a) : loop (Heap.union q' q2) (Map.insert v (Pair c a) visited)
 
 -- ------------------------------------------------------------------------
 
