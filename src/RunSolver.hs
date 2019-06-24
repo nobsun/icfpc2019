@@ -40,6 +40,6 @@ doSolve GetManipulator =  SolverGetManipulator.solve
 solutionDir :: Algo -> FilePath
 solutionDir = ("/home/icfpc2019/solutions/" </>) . show
 
-callSolver :: FilePath -> Algo -> IO ()
-callSolver prob a =
-  ioExitCode =<< rawSystem "./bin/solve-one" [prob, show a]
+callSolver :: Int -> Algo -> IO ()
+callSolver n a =
+  ioExitCode =<< rawSystem "./lib/do-solve-one.sh" [show n, show a]
