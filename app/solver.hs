@@ -10,6 +10,7 @@ import System.IO
 
 import qualified SolverSimple
 import qualified SolverSimplePrime
+import qualified SolverGetManipulator
 import Task
 
 data Options
@@ -30,7 +31,7 @@ optionsParser = Options
     algorithmOption = strOption
       $  long "alg"
       <> metavar "ALGORITHM"
-      <> help "algorithm: simple (default), simple-prime"
+      <> help "algorithm: simple (default), simple-prime, get-manipulator"
       <> value "simple"
 
 parserInfo :: ParserInfo Options
@@ -49,6 +50,7 @@ main = do
       sol <- case optAlgorithm opt of
                "simple" -> return $ SolverSimple.solve task
                "simple-prime" -> return $ SolverSimplePrime.solve task
+               "get-manipulator" -> return $ SolverGetManipulator.solve task
                name -> hPutStrLn stderr ("unknown solver: " ++ name) >> exitFailure
       BB.hPutBuilder stdout (printSolution sol)
       SB.putStrLn ""

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1ce9b96f213fab7e545148ae3092034f148175bd6d795f1d095979e89ce847a5
+-- hash: cc1e80a9d058e5128d9d00bcd3668365e108165a8ca59a856d001bb8302ca8dd
 
 name:           icfpc2019
 version:        0.1.0.0
@@ -32,6 +32,7 @@ library
       Region
       ShortestPath
       Solver
+      SolverGetManipulator
       SolverSimple
       SolverSimplePrime
       SubmitQueue
