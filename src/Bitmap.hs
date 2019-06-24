@@ -25,7 +25,7 @@ printBitmap :: UArray Point Bool -> IO ()
 printBitmap = mapM_ putStrLn . bitmapToLines
 
 isVisible :: UArray Point Bool -> Point -> Point -> Bool
-isVisible bm from to = all (bm !) $ passingCells from to
+isVisible bm from to = all (\p -> inRange (bounds bm) p && (bm ! p)) $ passingCells from to   
 
 passingCells :: Point -> Point -> [Point]
 passingCells p0@(x0,y0) p1@(x1,y1)
