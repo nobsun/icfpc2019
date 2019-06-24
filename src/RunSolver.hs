@@ -9,6 +9,7 @@ import System.IO (withFile, IOMode (WriteMode))
 import Task (Task, Solution, printSolution)
 import qualified SolverSimple
 import qualified SolverSimplePrime
+import qualified SolverManipulator
 import qualified SolverGetManipulator
 import Problems (problemName, readTaskFile)
 import ProcessIO (ioExitCode)
@@ -16,6 +17,7 @@ import ProcessIO (ioExitCode)
 data Algo
   = Simple
   | SimplePrime
+  | Manipulator
   | GetManipulator
   deriving (Eq, Ord, Show, Read)
 
@@ -35,6 +37,7 @@ solve1 algo n = do
 doSolve :: Algo -> Task -> Solution
 doSolve Simple         =  SolverSimple.solve
 doSolve SimplePrime    =  SolverSimplePrime.solve
+doSolve Manipulator    =  SolverManipulator.solve
 doSolve GetManipulator =  SolverGetManipulator.solve
 
 solutionDir :: Algo -> FilePath

@@ -33,6 +33,12 @@ solve task = loop Seq.empty s0 bm0 (generateGraph bm0)
 
     loop !hist s bm' g'
       | Set.null (WW.stUnwrapped s) = [F.toList hist]
+      | hasManip  =
+          loop
+            (hist <> Seq.fromList [attach])
+            (WW.simulateSolution [[attach]] s)
+            bm
+            g
       | otherwise =
           loop
             (hist <> Seq.fromList actions)
@@ -44,7 +50,21 @@ solve task = loop Seq.empty s0 bm0 (generateGraph bm0)
         boosterMap = WW.stBoostersOnMap s
         w0 = (WW.stWrappers s) V.! 0
         p0 = WW.wsPosition w0
-        arms = Set.map (\(dx, dy) -> (fst p0 + dx, snd p0 + dy)) $ WW.wsManipulators w0
+        d_arms = WW.wsManipulators w0
+
+        ymin = maybe 0 snd $ Set.lookupMin d_arms
+        ymax = maybe 0 snd $ Set.lookupMax d_arms
+
+        attach = AttachManipulator $
+          case compare (abs ymin) ymax of
+            LT  ->  (1, ymin - 1)
+            EQ  ->  (1, ymax + 1)
+            GT  ->  (1, ymax + 1)
+
+        manipCount = Map.findWithDefault 0 BoosterB (WW.stBoostersCollected s)
+        hasManip = manipCount > 0
+
+        arms = Set.map (\(dx, dy) -> (fst p0 + dx, snd p0 + dy)) d_arms
         visible_ = Bitmap.isVisible bm
         visible = visible_ p0
 
