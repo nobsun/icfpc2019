@@ -226,7 +226,7 @@ attachFastWheel i s
       }
   where
     w0@WrapperState{ wsFastWheelRemainingTime = t } = stWrappers s V.! i
-    w1 = w0{ wsFastWheelRemainingTime = max 51 t } -- ステップの最後で減らすので1多い値にしておく
+    w1 = w0{ wsFastWheelRemainingTime = t + 50 + 1 } -- ステップの最後で減らすので1多い値にしておく
 
 
 useDrill :: Int -> State -> State
@@ -239,7 +239,7 @@ useDrill i s
       }
   where
     w0@WrapperState{ wsDrillRemainingTime = t } = stWrappers s V.! i
-    w1 = w0{ wsDrillRemainingTime = max 51 t } -- ステップの最後で減らすので1多い値にしておく
+    w1 = w0{ wsDrillRemainingTime = t + 30 + 1 } -- ステップの最後で減らすので1多い値にしておく
 
 
 reset :: Int -> State -> State
