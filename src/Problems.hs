@@ -1,6 +1,7 @@
 module Problems where
 
 import qualified Data.ByteString.Lazy as LB
+import qualified Data.ByteString.Builder as BB
 import System.FilePath ((</>), (<.>))
 
 import Task (Task, parseTask)
@@ -54,9 +55,14 @@ ddd n = replicate (3 - length s) '0' <> s
   where
     s = show n
 
+problemName :: (Ord a, Integral a, Show a)
+            => a
+            -> String
+problemName n = "prob-" <> ddd n
+
 problemPath :: (Ord a, Integral a, Show a)
             => a
             -> Maybe FilePath
 problemPath n = do
   t <- problemType n
-  return $ problemDir t </> ("prob-" <> ddd n) <.> "desc"
+  return $ problemDir t </> problemName n <.> "desc"
