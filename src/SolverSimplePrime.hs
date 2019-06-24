@@ -4,7 +4,6 @@ module SolverSimplePrime where
 
 import Data.Array.IArray
 import qualified Data.Foldable as F
-import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Map as Map
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
@@ -30,8 +29,8 @@ solve task = loop Seq.empty (WW.initialState task)
         w0 = (WW.stWrappers s) V.! 0
         p0 = WW.wsPosition w0
 
-        g :: SP.Graph Point Int Action
-        g = HashMap.fromList $ do
+        g :: SP.Graph' Point Int Action
+        g = Map.fromList $ do
               p@(x,y) <- range bs
               return $
                 ( p
@@ -58,7 +57,7 @@ solve task = loop Seq.empty (WW.initialState task)
         actions :: [Action]
         actions = head $
           [ [act | (_,_,_,act) <- SP.pathEdges path']
-          | (p1, _cost, path') <- SP.dijkstraIncremental SP.path g [p0]
+          | (p1, _cost, path') <- SP.dijkstraIncremental' SP.path g [p0]
           , p1 /= p0
           , p1 `Set.member` WW.stUnwrapped s
           ]

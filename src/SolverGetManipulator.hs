@@ -6,7 +6,6 @@ import Data.Function (on)
 import Data.List (groupBy, partition)
 import Data.Array.IArray
 import qualified Data.Foldable as F
-import qualified Data.HashMap.Strict as HashMap
 import qualified Data.Sequence as Seq
 import qualified Data.Set as Set
 import qualified Data.Map as Map
@@ -19,7 +18,7 @@ import qualified WorkerWrapper as WW
 -- import Control.Monad (join)
 -- import Debug.Trace (traceShow)
 
-type Graph = SP.Graph Point Int Action
+type Graph = SP.Graph' Point Int Action
 type Edge  = SP.Edge Point Int Action
 type ActionPath = [Edge]
 
@@ -40,7 +39,7 @@ solve task = loop Seq.empty (WW.initialState task)
         p0 = WW.wsPosition w0
 
         g :: Graph
-        g = HashMap.fromList $ do
+        g = Map.fromList $ do
               p@(x,y) <- range bs
               return $
                 ( p
@@ -65,7 +64,7 @@ solve task = loop Seq.empty (WW.initialState task)
         minCosts =
           map snd . head $ groupBy ((==) `on` fst)
           [ (cost, (manip, es))
-          | (p1, cost, path') <- SP.dijkstraIncremental SP.path g [p0]
+          | (p1, cost, path') <- SP.dijkstraIncremental' SP.path g [p0]
           , p1 /= p0
           , let manip = BoosterB `elem` Map.findWithDefault [] p1 boosterMap
           , manip || p1 `Set.member` WW.stUnwrapped s
