@@ -5,6 +5,7 @@ module RunConcurrent  (
 import Control.Monad
 import Control.Concurrent (forkIO, ThreadId)
 import Control.Concurrent.Chan (Chan, newChan, readChan, writeChan)
+import System.IO (hSetBuffering, stdout, BufferMode (..))
 
 import RunSolver (Algo, callSolver)
 
@@ -38,11 +39,24 @@ runConcurrent n q action =
 
 -----
 
+newLog :: IO (String -> IO ())
+newLog = do
+  hSetBuffering stdout LineBuffering
+  lq <- newChan
+  void $ forkIO $ forever $ putStrLn =<< readChan lq
+  return $ writeChan lq
+
 solveConcurrent :: Int
                 -> [(Int, Algo)]
                 -> IO ()
 solveConcurrent para probs = do
+  putLog <- newLog
   tq <- newTaskQueue
-  void $ runConcurrent para tq (uncurry callSolver)
+  void $ runConcurrent para tq $
+    \p -> do
+      putLog $ "Running: " ++ show p
+      uncurry callSolver p
+      putLog $ "Done   : " ++ show p
+
   mapM_ (enqueueTask tq) probs
   finalizeTaskQueue para tq
