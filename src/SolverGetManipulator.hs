@@ -16,6 +16,8 @@ import Task
 import qualified ShortestPath as SP
 import qualified WorkerWrapper as WW
 
+-- import Control.Monad (join)
+-- import Debug.Trace (traceShow)
 
 type Graph = SP.Graph Point Int Action
 type Edge  = SP.Edge Point Int Action
@@ -55,6 +57,9 @@ solve task = loop Seq.empty (WW.initialState task)
         ordered :: [ActionPath]
         ordered = map snd ms ++ map snd nms
           where (ms, nms) = partition fst minCosts
+                -- traceNN xs
+                --   | null xs    =  xs
+                --   | otherwise  =  join traceShow xs
 
         minCosts :: [(Bool, ActionPath)]
         minCosts =
