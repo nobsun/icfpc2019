@@ -26,13 +26,3 @@ haskell-stack https://docs.haskellstack.org/en/stable/README/
 * [Yasuyuki Ogawa](https://github.com/oganet)
 * [Chikanobu Toyofuku](https://github.com/itto100pen)
 * [Nobuo Yamashita](https://github.com/nobsun)
-
-
-## 開発環境(本節は開発が済みしだい削除予定)
-
-@khibinoさんが準備してくれた開発環境
-
-```
-ssh -p 8022 reasoning.tokyo
-```
-
