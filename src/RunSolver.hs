@@ -2,7 +2,7 @@ module RunSolver where
 
 import qualified Data.ByteString.Builder as BB
 import System.FilePath ((</>), (<.>))
-import System.Directory (renameFile)
+import System.Directory (renameFile, createDirectoryIfMissing)
 import System.Process (rawSystem)
 import System.IO (withFile, IOMode (WriteMode))
 
@@ -27,6 +27,7 @@ solve1 algo n = do
   task <- readTaskFile n
   let sol = doSolve algo task
       solFn = solutionDir algo </> problemName n <.> "sol"
+  createDirectoryIfMissing True (solutionDir algo)
   withFile (solFn <.> "new") WriteMode
     $ \h -> BB.hPutBuilder h (printSolution sol)
   renameFile (solFn <.> "new") solFn
