@@ -25,7 +25,7 @@ optionsParser = Options
   <*> algorithmOption
   where
     fileInput :: Parser FilePath
-    fileInput = strArgument $ metavar "(FILE|-)"
+    fileInput = strArgument $ metavar "FILE"
 
     algorithmOption :: Parser String
     algorithmOption = strOption
