@@ -8,16 +8,22 @@ import Control.Concurrent.Chan (Chan, newChan, readChan, writeChan)
 
 import RunSolver (Algo, callSolver)
 
-type TaskQueue a = Chan (Maybe a)
+data TaskQueue a =
+  TaskQueue
+  { tasks :: Chan (Maybe a)
+  , waits :: Chan ()
+  }
 
 newTaskQueue :: IO (TaskQueue a)
-newTaskQueue = newChan
+newTaskQueue = TaskQueue <$> newChan <*> newChan
 
 enqueueTask :: TaskQueue a -> a -> IO ()
-enqueueTask q = writeChan q . Just
+enqueueTask q = writeChan (tasks q) . Just
 
 finalizeTaskQueue :: Int -> TaskQueue a -> IO ()
-finalizeTaskQueue n q = replicateM_ n (writeChan q Nothing)
+finalizeTaskQueue n q = do
+  replicateM_ n (writeChan (tasks q) Nothing)
+  replicateM_ n (readChan $ waits q)
 
 runConcurrent :: Int
               -> TaskQueue a
@@ -27,8 +33,8 @@ runConcurrent n q action =
     replicateM n $ forkIO loop
   where
     loop = do
-      mt <- readChan q
-      maybe (return ()) (\t -> action t >> loop) mt
+      mt <- readChan $ tasks q
+      maybe (writeChan (waits q) ()) (\t -> action t >> loop) mt
 
 -----
 
