@@ -1,5 +1,6 @@
 module Bitmap where
 
+import Control.Arrow ((&&&),(***))
 import Data.Array.Unboxed
 import qualified Data.Map as Map
 import Data.Ratio
@@ -36,13 +37,13 @@ passingCells p0@(x0,y0) p1@(x1,y1)
   | p0 == p1  = [p0]
   | otherwise = filter passed cells
   where
-    ((minX, maxX), (minY, maxY)) = ((min x0 x1, max x0 x1), (min y0 y1, max y0 y1))
+    (minX, maxX, minY, maxY) = (min x0 x1, max x0 x1, min y0 y1, max y0 y1)
     -- セル位置
     cells :: [Point]
-    cells = [(x, y) | x <- [minX..maxX], y <- [minY..maxY]]
+    cells = [(x, y) | x <- [minX .. maxX], y <- [minY .. maxY]]
     -- 各交点
     corners :: [Point]
-    corners = [(x, y)| x <- [minX..maxX+1], y <- [minY..maxY+1]]
+    corners = [(x, y)| x <- [minX .. maxX+1], y <- [minY .. maxY+1]]
     -- 始点終点の座標
     (p0'@(x0',y0'), p1'@(x1',y1')) = ((f x0, f y0), (f x1, f y1)) where f x = fromIntegral x + 1%2
     -- 判別式
@@ -51,10 +52,10 @@ passingCells p0@(x0,y0) p1@(x1,y1)
       | v == 0 = On
       | v >  0 = Up
       | v <  0 = Down
-      where v = (fromIntegral y - y0') * (x1' - x0') - (y1' - y0') * (fromIntegral x - x0')
+      where v =  (x1'-x0')*(fromIntegral y-y0')-(y1'-y0')*(fromIntegral x-x0')
     -- 各交点の判別結果
     judged :: Map.Map Point Bound
-    judged = Map.fromList $ map (\p -> (p, judge p)) corners
+    judged = Map.fromList $ map (id &&& judge) corners
     -- セルの四隅
     cornerOf :: Point -> [Point]
     cornerOf (x,y) = [(x',y') | x' <- [x,x+1], y' <- [y,y+1]]
@@ -62,24 +63,3 @@ passingCells p0@(x0,y0) p1@(x1,y1)
     passed :: Point -> Bool
     passed p@(x,y) = Up `elem` bs && Down `elem` bs
       where bs = map (judged Map.!) (cornerOf p)
-
-passingCells' :: Point -> Point -> [Point]
-passingCells' p0@(x0,y0) p1@(x1,y1)
-  | x0 == x1 = [(x0,y) | y <- [min y0 y1 .. max y0 y1]]
-  | y0 == y1 = [(x,y0) | x <- [min x0 x1 .. max x0 x1]]
-  | otherwise = concat $
-      [ if max l r <= toRational (floor (min l r) + 1)
-        then [(x, floor (min l r))]
-        else [(x, floor (min l r)), (x, floor (min l r) + 1)]
-      | x <- [x0, x0 + signum (x1 - x0) .. x1]
-      , let l = f (fromIntegral x)
-      , let r = f (fromIntegral x + 1)
-      ]
-      where
-        a :: Rational
-        a = fromIntegral (y1 - y0) / fromIntegral (x1 - x0)
-
-        -- (x0 + 0.5, y0 + 0.5) を通る傾き a の直線
-        f :: Rational -> Rational
-        f x = a * (x - (fromIntegral x0 + 0.5)) + (fromIntegral y0 + 0.5)
-
