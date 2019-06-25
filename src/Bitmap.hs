@@ -2,6 +2,7 @@ module Bitmap where
 
 import Data.Array.Unboxed
 import qualified Data.Map as Map
+import Data.Ratio
 import qualified Region
 import Task
 
@@ -40,7 +41,7 @@ passingCells p0@(x0,y0) p1@(x1,y1) = filter passed cells
     corners :: [Point]
     corners = [(x, y)| x <- [min x0 x1 .. max x0 x1 + 1], y <- [min y0 y1 .. max y0 y1 + 1]]
     -- 始点終点の座標
-    (p0'@(x0',y0'), p1'@(x1',y1')) = ((f x0, f y0), (f x1, f y1)) where f x = fromIntegral x + 0.5
+    (p0'@(x0',y0'), p1'@(x1',y1')) = ((f x0, f y0), (f x1, f y1)) where f x = fromIntegral x + 1%2
     -- 判別式
     judge :: Point -> Bound
     judge (x,y)
@@ -58,9 +59,9 @@ passingCells p0@(x0,y0) p1@(x1,y1) = filter passed cells
     passed :: Point -> Bool
     passed p@(x,y) = Up `elem` bs && Down `elem` bs
       where bs = map (judged Map.!) (cornerOf p)
-{--
-passingCells :: Point -> Point -> [Point]
-passingCells p0@(x0,y0) p1@(x1,y1)
+
+passingCells' :: Point -> Point -> [Point]
+passingCells' p0@(x0,y0) p1@(x1,y1)
   | x0 == x1 = [(x0,y) | y <- [min y0 y1 .. max y0 y1]]
   | y0 == y1 = [(x,y0) | x <- [min x0 x1 .. max x0 x1]]
   | otherwise = concat $
@@ -78,4 +79,4 @@ passingCells p0@(x0,y0) p1@(x1,y1)
         -- (x0 + 0.5, y0 + 0.5) を通る傾き a の直線
         f :: Rational -> Rational
         f x = a * (x - (fromIntegral x0 + 0.5)) + (fromIntegral y0 + 0.5)
---}
+
