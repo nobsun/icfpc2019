@@ -53,7 +53,7 @@ passingCells p0@(x0,y0) p1@(x1,y1)
       where v = (fromIntegral y - y0') * (x1' - x0') - (y1' - y0') * (fromIntegral x - x0')
     -- 各交点の判別結果
     judged :: Map.Map Point Bound
-    judged = Map.fromList $ map (\p@(x,y) -> ((x, y), judge p)) corners
+    judged = Map.fromList $ map (\p -> (p, judge p)) corners
     -- セルの四隅
     cornerOf :: Point -> [Point]
     cornerOf (x,y) = [(x',y') | x' <- [x,x+1], y' <- [y,y+1]]
