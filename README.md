@@ -26,3 +26,7 @@ haskell-stack https://docs.haskellstack.org/en/stable/README/
 * [Yasuyuki Ogawa](https://github.com/oganet)
 * [Chikanobu Toyofuku](https://github.com/itto100pen)
 * [Nobuo Yamashita](https://github.com/nobsun)
+
+## Submissions
+
+* [contest tag](https://github.com/nobsun/icfpc2019/releases/tag/contest) is the version used for generating final submission.
