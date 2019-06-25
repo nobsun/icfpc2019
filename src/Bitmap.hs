@@ -36,12 +36,13 @@ passingCells p0@(x0,y0) p1@(x1,y1)
   | p0 == p1  = [p0]
   | otherwise = filter passed cells
   where
+    ((minX, maxX), (minY, maxY)) = ((min x0 x1, max x0 x1), (min y0 y1, max y0 y1))
     -- セル位置
     cells :: [Point]
-    cells = [(x, y) | x <- [min x0 x1 .. max x0 x1], y <- [min y0 y1 .. max y0 y1]]
+    cells = [(x, y) | x <- [minX..maxX], y <- [minY..maxY]]
     -- 各交点
     corners :: [Point]
-    corners = [(x, y)| x <- [min x0 x1 .. max x0 x1 + 1], y <- [min y0 y1 .. max y0 y1 + 1]]
+    corners = [(x, y)| x <- [minX..maxX+1], y <- [minY..maxY+1]]
     -- 始点終点の座標
     (p0'@(x0',y0'), p1'@(x1',y1')) = ((f x0, f y0), (f x1, f y1)) where f x = fromIntegral x + 1%2
     -- 判別式
