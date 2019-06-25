@@ -30,29 +30,35 @@ isVisible bm from to = all (\p -> inRange (bounds bm) p && (bm ! p)) $ passingCe
 
 data Bound = Up | On | Down deriving (Show, Eq, Ord)
 
--- passingCells' :: Point -> Point -> [Point]
-passingCells' p0@(x0,y0) p1@(x1,y1) = filter passed cells
+passingCells :: Point -> Point -> [Point]
+passingCells p0@(x0,y0) p1@(x1,y1) = filter passed cells
   where
     -- セル位置
-    cells = [(floor x, floor y) | x <- [min x0 x1 .. max x0 x1], y <- [min y0 y1 .. max y0 y1]]
+    cells :: [Point]
+    cells = [(x, y) | x <- [min x0 x1 .. max x0 x1], y <- [min y0 y1 .. max y0 y1]]
     -- 各交点
+    corners :: [Point]
     corners = [(x, y)| x <- [min x0 x1 .. max x0 x1 + 1], y <- [min y0 y1 .. max y0 y1 + 1]]
     -- 始点終点の座標
-    (p0'@(x0',y0'), p1'@(x1',y1')) = ((f x0, f y0), (f x1, f y1)) where f x = x+0.5
+    (p0'@(x0',y0'), p1'@(x1',y1')) = ((f x0, f y0), (f x1, f y1)) where f x = fromIntegral x + 0.5
     -- 判別式
+    judge :: Point -> Bound
     judge (x,y)
       | v == 0 = On
       | v >  0 = Up
       | v <  0 = Down
-      where v = (y-y0')*(x1'-x0')-(y1'-y0')*(x-x0')
+      where v = (fromIntegral y - y0') * (x1' - x0') - (y1' - y0') * (fromIntegral x - x0')
     -- 各交点の判別結果
-    judged = Map.fromList $ map (\p@(x,y) -> ((floor x, floor y), judge p)) corners
+    judged :: Map.Map Point Bound
+    judged = Map.fromList $ map (\p@(x,y) -> ((x, y), judge p)) corners
     -- セルの四隅
+    cornerOf :: Point -> [Point]
     cornerOf (x,y) = [(x',y') | x' <- [x,x+1], y' <- [y,y+1]]
     -- セルを通過するか
-    passed p@(x,y) = any (==Up) bs && any (==Down) bs
+    passed :: Point -> Bool
+    passed p@(x,y) = Up `elem` bs && Down `elem` bs
       where bs = map (judged Map.!) (cornerOf p)
-
+{--
 passingCells :: Point -> Point -> [Point]
 passingCells p0@(x0,y0) p1@(x1,y1)
   | x0 == x1 = [(x0,y) | y <- [min y0 y1 .. max y0 y1]]
@@ -72,3 +78,4 @@ passingCells p0@(x0,y0) p1@(x1,y1)
         -- (x0 + 0.5, y0 + 0.5) を通る傾き a の直線
         f :: Rational -> Rational
         f x = a * (x - (fromIntegral x0 + 0.5)) + (fromIntegral y0 + 0.5)
+--}
