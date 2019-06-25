@@ -32,7 +32,9 @@ isVisible bm from to = all (\p -> inRange (bounds bm) p && (bm ! p)) $ passingCe
 data Bound = Up | On | Down deriving (Show, Eq, Ord)
 
 passingCells :: Point -> Point -> [Point]
-passingCells p0@(x0,y0) p1@(x1,y1) = filter passed cells
+passingCells p0@(x0,y0) p1@(x1,y1)
+  | p0 == p1  = [p0]
+  | otherwise = filter passed cells
   where
     -- セル位置
     cells :: [Point]
