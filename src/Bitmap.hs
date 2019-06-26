@@ -1,5 +1,6 @@
 module Bitmap where
 
+import Control.Applicative
 import Data.Array.Unboxed
 
 import qualified Region
@@ -28,6 +29,7 @@ printBitmap = mapM_ putStrLn . bitmapToLines
 isVisible :: UArray Point Bool -> Point -> Point -> Bool
 isVisible bm from to = all (\p -> inRange (bounds bm) p && (bm ! p)) $ passingCells from to
 
+{-
 passingCells_ :: Point -> Point -> [Point]
 passingCells_ p0@(x0,y0) p1@(x1,y1)
   | x0 == x1 = [(x0,y) | y <- [min y0 y1 .. max y0 y1]]
@@ -47,11 +49,57 @@ passingCells_ p0@(x0,y0) p1@(x1,y1)
         -- (x0 + 0.5, y0 + 0.5) を通る傾き a の直線
         f :: Rational -> Rational
         f x = a * (x - (fromIntegral x0 + 0.5)) + (fromIntegral y0 + 0.5)
+ -}
 
 -----
 
+data Region = Neg | Zero | Pos deriving (Show, Eq, Ord)
+
 passingCells :: Point -> Point -> [Point]
-passingCells p0@(x0,y0) p1@(x1,y1)
+passingCells p0@(x0, y0) (x1, y1) = go p0
+  where
+    (sx, sy) = (fromIntegral x0 + 1/2, fromIntegral y0 + 1/2) {- 始点 -}
+    (ex, ey) = (fromIntegral x1 + 1/2, fromIntegral y1 + 1/2) {- 終点 -}
+    (segx, segy) = (ex - sx, ey - sy) {- 線分の変位 -}
+
+    {- 領域判別 -}
+    discriminant :: Point -> Region
+    discriminant (x, y)
+      | v < 0      =  Neg
+      | v > 0      =  Pos
+      | otherwise  =  Zero
+      where
+        v = segy * (fromIntegral x - ex) - segx * (fromIntegral y - ey)
+
+    {- セルの中心点 -}
+    centerOf (x, y) = (fromIntegral x + 1/2, fromIntegral y + 1/2)
+
+    {- セル中心点の終点までの内積距離 -}
+    enorm :: Point -> Rational
+    enorm p = abs (segx * (x - ex) + segy * (y - ey))  where (x, y) = centerOf p
+
+    {- セルを通るか -}
+    passing :: Point -> Bool
+    passing (x, y) = Neg `elem` ds && Pos `elem` ds
+      where ds = map discriminant $ (,) <$> [x, x + 1] <*> [y, y + 1]
+
+    go :: Point -> [Point]
+    go p@(x, y)
+      | enorm p == 0  =  [p]
+      | otherwise     =  p : go (head nexts)
+      where
+        nexts =
+          [ q
+          | (a, b) <- [ (1, 0), (0, 1), (-1, 0), (0, -1) ] <|> {- 隣りを優先 -}
+                      (,) <$> [1, -1] <*> [1, -1]              {- 隣りが無ければ斜め -}
+          , let q = (x + a, y + b)
+          , enorm q < enorm p && passing q {- 終点に近づく かつ セルを通る -}
+          ]
+
+-----
+
+passingCells_inclination :: Point -> Point -> [Point]
+passingCells_inclination p0@(x0,y0) p1@(x1,y1)
   | p0 == p1        = [p0]
   | abs a <= 1      =
     if x0 > x1
